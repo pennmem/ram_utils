@@ -442,7 +442,7 @@ class ReportGenerator(object):
                 stim=False,
                 combined_summary=self._make_repfr_summary(),
                 classifiers=self._make_classifier_data(),
-                plot_data=self._make_plot_data(stim=False, classifier=True, biomarker_delta=True),
+                plot_data=self._make_plot_data(stim=False, classifier=True, biomarker_delta=False),
                 sme_table=self._make_target_selection_table(),
                 hmm_results=self.hmm_results,
                 feature_data=self._make_feature_plots()

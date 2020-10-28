@@ -132,13 +132,13 @@ def summarize_nonstim_sessions(all_events, task_events,
                              raw_events=session_all_events,
                              repetition_ratio_dict=repetition_ratio_dict)
         elif experiment in ['RepFR1']:
-            #raise NotImplementedError("repFR1 not implemented")
             summary = repFRSessionSummary()
             summary.populate(session_task_events,
-                              bipolar_pairs,
-                              excluded_pairs,
-                              session_powers,
-                              raw_events=session_all_events)
+                             bipolar_pairs,
+                             excluded_pairs,
+                             session_powers,
+                             raw_events=session_all_events)
+
         elif experiment in ['DBOY1']:
             raise NotImplementedError("Courier not implemented")
         else:
@@ -356,7 +356,7 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
 def summarize_location_search_sessions(all_events, stim_params, pairs_metadata_table, excluded_pairs,
                                        connectivity, post_stim_eeg, rootdir='/'):
     session_summaries = []
-    subject , experiment, sessions = extract_event_metadata(all_events)
+    subject, experiment, sessions = extract_event_metadata(all_events)
     bipolar_pairs = {subject: {'pairs': pairs_metadata_table.to_dict(orient='index')}}
     locations = pairs_metadata_table[['location', 'label']]
     locations.index = pairs_metadata_table.channel_1.astype(int)
@@ -390,7 +390,7 @@ def summarize_location_search_sessions(all_events, stim_params, pairs_metadata_t
     for _, target_df in events_df.groupby(['session', 'stimAnodeTag', 'stimCathodeTag']):
         idxs = target_df.index.tolist()
         target_events = dataframe_to_recarray(target_df, expected_dtypes)
-        pre_psd, post_psd, emask, cmask = get_psd_data(target_df, rootdir).compute()
+        pre_psd, post_psd, emask, cmask = get_psd_data(target_df, rootdir)
         summary = LocationSearchSessionSummary()
         summary.populate(
             target_events, bipolar_pairs, excluded_pairs,

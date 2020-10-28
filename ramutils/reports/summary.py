@@ -79,7 +79,7 @@ class ClassifierSummary(Schema):
     def id(self):
         session_str = ".".join([str(sess)
                                 for sess in np.unique(self.sessions)])
-        return ":".join([self.subject, self.experiment, session_str])
+        return ":".join([self.subject, self.experiment, session_str, self.tag])
 
     @property
     def predicted_probabilities(self):

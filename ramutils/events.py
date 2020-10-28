@@ -106,7 +106,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
                  pre=None, post=None, return_stim_events=False,
                  all_events=False):
     """
-        Peform basic cleaning operations on events such as removing incomplete
+        Perform basic cleaning operations on events such as removing incomplete
         sessions, negative offset events, and incomplete lists. For FR events,
         baseline events needs to be found. Events are then normalized so that
         cross-experiment events can be merged.
@@ -159,7 +159,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
                            ' datasets')
     experiment = experiments[0]
 
-
     events = remove_negative_offsets(events)
 
     events = remove_voice_detection(events)
@@ -175,8 +174,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     
     events = remove_incomplete_lists(events)
 
-    # FIXME: simplify logic so subsetting only happens if
-    # combining experiments
+    # FIXME: simplify logic so subsetting only happens if combining experiments
     events = select_column_subset(events, all_relevant=True)
 
     # separate_stim_events is called within the task-specific functions
@@ -534,6 +532,7 @@ def combine_retrieval_events(events):
         event type.
 
     """
+    events.recalled[events.type == 'REC_WORD'] = 1
     events.type[(events.type == 'REC_WORD') |
                 (events.type == 'REC_BASE')] = 'REC_EVENT'
     return events
@@ -1147,8 +1146,6 @@ def extract_subject(events, add_localization=False):
     if add_localization:
         montage = np.unique(events[events.montage != ''].montage).tolist()
         if montage[0] != '0.0':
-            localization = montage[0][0]
-            #subject = "_".join([subject, localization]) # I think this is wrong for our naming convention (paw)
             montage_id = montage[0][2]
             subject = "_".join([subject, montage_id]) # this follows our naming convention
     return subject

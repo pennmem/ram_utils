@@ -35,22 +35,22 @@ def test_reload_classifier_rhino(rhino_root):
     return
 
 
-@pytest.mark.parametrize('subject', [
-    'R1350D',
-    'R1353N',
-    'R1354E'
-])
-def test_train_classifier(subject, rhino_root):
-    events = load_event_test_data(datafile('/events/{}_task_events.npy'.format(
-        subject)), rhino_root)
-    powers = np.load(datafile('/powers/{}_normalized_powers.npy'.format(
-        subject)))
-    weights = np.load(datafile('/weights/{}_sample_weights.npy'.format(
-        subject)))
-
-    trained_classifier = train_classifier(powers, events, weights, 0.001,
-                                          'l2', 'liblinear')
-
-    # TODO: Need some strong checks here
-    assert trained_classifier is not None
-    return
+#@pytest.mark.parametrize('subject', [
+#    'R1350D',
+#    'R1353N',
+#    'R1354E'
+#])
+#def test_train_classifier(subject, rhino_root):
+#    events = load_event_test_data(datafile('/events/{}_task_events.npy'.format(
+#        subject)), rhino_root)
+#    powers = np.load(datafile('/powers/{}_normalized_powers.npy'.format(
+#        subject)))
+#    weights = np.load(datafile('/weights/{}_sample_weights.npy'.format(
+#        subject)))
+#
+#    trained_classifier = train_classifier(powers, events, weights, 0.001,
+#                                          'l2', 'liblinear')
+#
+#    # TODO: Need some strong checks here
+#    assert trained_classifier is not None
+#    return

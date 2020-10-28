@@ -27,7 +27,7 @@ class PipelineCallback(Callback):
     Usage::
 
         with PipelineCallback('my-totally-unique-pipeline-name'):
-            delayed_stuff.compute()
+            delayed_stuff
 
     Parameters
     ----------

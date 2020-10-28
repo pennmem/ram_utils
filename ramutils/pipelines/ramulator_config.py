@@ -109,7 +109,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         paths = generate_electrode_config(subject, paths, anodes, cathodes,
                                           localization, montage,
                                           default_surface_area,
-                                          use_common_reference).compute()
+                                          use_common_reference)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
@@ -121,7 +121,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
     pairs_to_exclude = stim_params
     if use_classifier_excluded_leads:
         classifier_excluded_leads = get_classifier_excluded_leads(
-            subject, ec_pairs, rootdir=paths.root).compute()
+            subject, ec_pairs, rootdir=paths.root)
         pairs_to_exclude = pairs_to_exclude + classifier_excluded_leads
 
     excluded_pairs = reduce_pairs(ec_pairs, pairs_to_exclude, True)
@@ -131,7 +131,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
 
     # Ensure specified pairs exist. We have to call .compute here since no
     # other tasks depend on the output of this task.
-    validate_pairs(subject, ec_pairs, trigger_pairs).compute()
+    validate_pairs(subject, ec_pairs, trigger_pairs)
 
     # Special case handling of no-classifier tasks
     no_classifier_experiments = EXPERIMENTS["record_only"] + [
@@ -152,7 +152,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                                 extended_blanking=extended_blanking,
                                                 trigger_pairs=trigger_pairs)
         with PipelineCallback(pipeline_name):
-            return config_path.compute()
+            return config_path
 
     if "FR" not in experiment and "PAL" not in experiment:
         raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
@@ -206,4 +206,4 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         config_path.visualize(filename=vispath)
 
     with PipelineCallback(pipeline_name):
-        return config_path.compute()
+        return config_path

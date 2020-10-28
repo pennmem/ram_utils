@@ -44,7 +44,7 @@ class TestCrossValidation:
         classifier_summary = summarize_classifier(classifier, powers,
                                                   events, 10,
                                                   tag='test',
-                                                  **params).compute()
+                                                  **params)
         assert np.isclose(classifier_summary.auc, expected_output[subject],
                           rtol=1e-3)
         return
@@ -81,7 +81,7 @@ class TestCrossValidation:
                                                   powers,
                                                   events, 10,
                                                   tag='test',
-                                                  **params).compute()
+                                                  **params)
         assert np.isclose(classifier_summary.auc, expected_output[subject],
                           rtol=1e-3)
 

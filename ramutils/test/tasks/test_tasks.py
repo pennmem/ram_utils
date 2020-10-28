@@ -6,7 +6,7 @@ def test_make_task():
         return a - b
 
     wrapped = make_task(diff, 2, 1)
-    assert wrapped.compute() == 1
+    assert wrapped == 1
 
     wrapped = make_task(diff, 3, 1, cache=False)
-    assert wrapped.compute() == 2
+    assert wrapped == 2
