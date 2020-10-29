@@ -259,7 +259,7 @@ var ramutils = (function (mod, Plotly) {
         },
         legend: {
             x: 1,
-        }
+        },
 
         showlegend: true,
 
