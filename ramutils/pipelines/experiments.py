@@ -141,7 +141,6 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
 
         del encoding_reduced_powers
 
->>>>>>> a7a95b7cda927dab3b54e78607d659f320f02852
 
     target_selection_table = create_target_selection_table(
             pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
