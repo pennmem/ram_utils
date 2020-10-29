@@ -316,8 +316,7 @@ class ReportGenerator(object):
                 'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifier_summaries],
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
-            plot_data['tags'] = [
-                classifier.id for classifier in self.classifier_summaries],
+            plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
 
         return json.dumps(plot_data)
 

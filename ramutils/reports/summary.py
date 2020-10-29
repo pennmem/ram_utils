@@ -742,10 +742,12 @@ class FRSessionSummary(SessionSummary):
 
 class repFRSessionSummary(FRSessionSummary):
 
-    def populate(self, events, bipolar_pairs, excluded_pairs, 
+    def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None):
-       FRSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs, 
-                                 normalized_powers, raw_events=raw_events)
+        FRSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
+                                  normalized_powers, raw_events=raw_events)
+
+        self.events = self.events[(self.events.serialpos >= 3) & (self.events.serialpos <= 23)]
     
     @property
     def presentation_counts(self):
@@ -753,15 +755,15 @@ class repFRSessionSummary(FRSessionSummary):
 
     @property
     def num_correct(self):
-        return len(self.events[(self.events.serialpos >= 3) & (self.events.serialpos <= 23) & (self.events.type == 'WORD') & (self.events.recalled == 1) & (self.events.is_repeat == False)])
+        return len(self.events[(self.events.type == 'WORD') & (self.events.recalled == 1) & (self.events.is_repeat == False)])
 
     @property
     def num_words(self):
         """returns number of unique words presented"""
-        return len(self.events[(self.events.serialpos >= 3) & (self.events.serialpos <= 23) & (self.events.type == 'WORD')  & (self.events.is_repeat == False)])
+        return len(self.events[ (self.events.type == 'WORD')  & (self.events.is_repeat == False)])
 
     def get_num_words(self, repeats):
-        return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats) 
+        return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats)
                         & (self.events.is_repeat == False)])
 
 
