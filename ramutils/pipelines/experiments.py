@@ -55,10 +55,7 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         raise Exception("repFR does not support joint reports")
 
     repetition_ratio_dict = None  # NOTE: only for catFR experiments
-
     kwargs['encoding_only'] = False
-
-    # FIXME: why do I need this?
     kwargs['combine_events'] = False
 
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
@@ -86,6 +83,8 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
 
         reduced_powers = reduce_powers(powers, used_pair_mask,
                                        len(kwargs['freqs']))
+
+        del powers
 
         sample_weights = get_sample_weights(final_task_events, **kwargs)
 
@@ -115,29 +114,29 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         classifiers.append(trained_classifier)
         classifier_summaries.append(joint_classifier_summary)
 
-        encoding_only_mask = get_word_event_mask(final_task_events, True)
-        final_encoding_task_events = subset_events(final_task_events,
-                                                   encoding_only_mask)
-        encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
-
-        encoding_sample_weights = get_sample_weights(final_encoding_task_events,
-                                                     scheme='EQUAL',
-                                                     **kwargs)
-
-        encoding_classifier = train_classifier(encoding_reduced_powers,
-                                               final_encoding_task_events,
-                                               encoding_sample_weights,
-                                               kwargs['C'],
-                                               kwargs['penalty_type'],
-                                               kwargs['solver'])
-
-        encoding_classifier_summary = summarize_classifier(
-                encoding_classifier, encoding_reduced_powers,
-                final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
-                tag='{}p Encoding'.format(p), scheme='EQUAL', **kwargs)
-
-        classifiers.append(encoding_classifier)
-        classifier_summaries.append(encoding_classifier_summary)
+        # encoding_only_mask = get_word_event_mask(final_task_events, True)
+        # final_encoding_task_events = subset_events(final_task_events,
+        #                                            encoding_only_mask)
+        # encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
+        #
+        # encoding_sample_weights = get_sample_weights(final_encoding_task_events,
+        #                                              scheme='EQUAL',
+        #                                              **kwargs)
+        #
+        # encoding_classifier = train_classifier(encoding_reduced_powers,
+        #                                        final_encoding_task_events,
+        #                                        encoding_sample_weights,
+        #                                        kwargs['C'],
+        #                                        kwargs['penalty_type'],
+        #                                        kwargs['solver'])
+        #
+        # encoding_classifier_summary = summarize_classifier(
+        #         encoding_classifier, encoding_reduced_powers,
+        #         final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
+        #         tag='{}p Encoding'.format(p), scheme='EQUAL', **kwargs)
+        #
+        # classifiers.append(encoding_classifier)
+        # classifier_summaries.append(encoding_classifier_summary)
 
     powers, final_task_events = compute_normalized_powers(all_events, bipolar_pairs=ec_pairs, **kwargs)
 
@@ -153,9 +152,6 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
                                                    powers,
                                                    joint=joint_report,
                                                    repetition_ratio_dict=repetition_ratio_dict)
-
-    # classifiers.append(encoding_classifier)
-    classifier_summaries.append(encoding_classifier_summary)
 
     data = ReportData(session_summaries=session_summaries,
                       target_selection_table=target_selection_table,
