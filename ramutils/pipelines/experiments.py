@@ -71,25 +71,24 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
                                           sessions=sessions,
                                           **kwargs)
 
+    powers, final_task_events = compute_normalized_powers(all_task_events, bipolar_pairs=ec_pairs, **kwargs)
+
     pres_counts = (1, 2, 3)
     classifier_summaries = []
     classifiers = []
 
     for p in pres_counts:
-        # FIXME: for now, manually subset presentation events
-        events_subset = all_task_events[all_task_events['repeats'] == p]
+        events_mask = final_task_events['repeats'] == p
+        events_subset = subset_events(final_task_events, events_mask)
+        powers_subset = subset_powers(powers, events_mask)
 
-        powers, final_task_events = compute_normalized_powers(events_subset, bipolar_pairs=ec_pairs, **kwargs)
-
-        reduced_powers = reduce_powers(powers, used_pair_mask,
+        reduced_powers = reduce_powers(powers_subset, used_pair_mask,
                                        len(kwargs['freqs']))
 
-        del powers
-
-        sample_weights = get_sample_weights(final_task_events, **kwargs)
+        sample_weights = get_sample_weights(events_subset, **kwargs)
 
         classifier = train_classifier(reduced_powers,
-                                      final_task_events,
+                                      events_subset,
                                       sample_weights,
                                       kwargs['C'],
                                       kwargs['penalty_type'],
@@ -97,7 +96,7 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
 
         joint_classifier_summary = summarize_classifier(classifier,
                                                         reduced_powers,
-                                                        final_task_events,
+                                                        events_subset,
                                                         kwargs['n_perm'],
                                                         tag='{}p'.format(p),
                                                         pairs=pairinfo,
@@ -106,7 +105,7 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         trained_classifier = serialize_classifier(classifier,
                                                   final_pairs,
                                                   reduced_powers,
-                                                  final_task_events,
+                                                  events_subset,
                                                   sample_weights,
                                                   joint_classifier_summary,
                                                   subject)
@@ -137,8 +136,7 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         #
         # classifiers.append(encoding_classifier)
         # classifier_summaries.append(encoding_classifier_summary)
-
-    powers, final_task_events = compute_normalized_powers(all_events, bipolar_pairs=ec_pairs, **kwargs)
+        #del powers, reduced_powers, encoding_reduced_powers
 
     target_selection_table = create_target_selection_table(
             pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
