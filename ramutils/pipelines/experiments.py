@@ -116,31 +116,34 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         classifiers.append(trained_classifier)
         classifier_summaries.append(joint_classifier_summary)
 
-       # encoding_only_mask = get_word_event_mask(events_subset, True)
-       # final_encoding_task_events = subset_events(events_subset,
-       #                                            encoding_only_mask)
-       # encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
+        #### Encoding Classifiers
 
-       # encoding_sample_weights = get_sample_weights(final_encoding_task_events,
-       #                                              scheme='EQUAL',
-       #                                              **kwargs)
+        encoding_only_mask = get_word_event_mask(events_subset, True)
+        final_encoding_task_events = subset_events(events_subset,
+                                                   encoding_only_mask)
+        encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
 
-       # encoding_classifier = train_classifier(encoding_reduced_powers,
-       #                                        final_encoding_task_events,
-       #                                        encoding_sample_weights,
-       #                                        kwargs['C'],
-       #                                        kwargs['penalty_type'],
-       #                                        kwargs['solver'])
+        encoding_sample_weights = get_sample_weights(final_encoding_task_events,
+                                                     scheme='EQUAL',
+                                                     **kwargs)
 
-       # encoding_classifier_summary = summarize_classifier(
-       #         encoding_classifier, encoding_reduced_powers,
-       #         final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
-       #         tag='{}p Encoding'.format(p), scheme='EQUAL', **kwargs)
+        encoding_classifier = train_classifier(encoding_reduced_powers,
+                                               final_encoding_task_events,
+                                               encoding_sample_weights,
+                                               kwargs['C'],
+                                               kwargs['penalty_type'],
+                                               kwargs['solver'])
 
-       # classifiers.append(encoding_classifier)
-       # classifier_summaries.append(encoding_classifier_summary)
+        encoding_classifier_summary = summarize_classifier(
+                encoding_classifier, encoding_reduced_powers,
+                final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
+                tag='{}p Encoding'.format(p), scheme='EQUAL', **kwargs)
 
-        #del powers, reduced_powers, encoding_reduced_powers
+        classifiers.append(encoding_classifier)
+        classifier_summaries.append(encoding_classifier_summary)
+
+        del encoding_reduced_powers
+
 
     target_selection_table = create_target_selection_table(
             pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
