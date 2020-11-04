@@ -57,7 +57,7 @@ def test_generate_electrode_config(tmpdir):
     cathodes = None
 
     path = generate_electrode_config(
-        subject, paths, anodes, cathodes).compute()
+        subject, paths, anodes, cathodes)
     assert isinstance(path, FilePaths)
 
 
@@ -125,7 +125,7 @@ def test_generate_ramulator_config(experiment, output_dest):
         path = generate_ramulator_config(subject, experiment, container,
                                          stim_params, paths,
                                          excluded_pairs=excluded_pairs,
-                                         exp_params=exp_params).compute()
+                                         exp_params=exp_params)
         container.save.assert_called_once()
 
     with ZipFile(path) as zf:

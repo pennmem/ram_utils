@@ -34,7 +34,7 @@ def test_hooks():
 
     with patch.object(DatagramHandler, 'emit') as emit:
         with PipelineCallback(name):
-            total(sqrt(generate_data(10))).compute()
+            total(sqrt(generate_data(10)))
 
         for i, args in enumerate(emit.call_args_list):
             data = json.loads(args[0][0].msg)

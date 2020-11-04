@@ -24,9 +24,6 @@ def build_static_report(subject, experiment, session_summaries, math_summaries,
         subject = "Multi-subject"
 
 
-    print("tasks/reports.py")
-    print("*************")
-    print("created report generator")
     generator = ReportGenerator(subject, experiment, session_summaries, math_summaries,
                                 delta_hfa_table, classifier_summaries,
                                 dest=dest, hmm_results=hmm_results)

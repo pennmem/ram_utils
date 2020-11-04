@@ -8,7 +8,6 @@ from cmlreaders.convert import milliseconds_to_events, samples_to_milliseconds
 
 __all__ = [
     'countdown_to_resting',
-    'get_countdown_events',
     'get_resting_state_connectivity',
     'read_eeg_data',
 ]
@@ -41,19 +40,6 @@ FREQUENCY_BANDS = {
 }
 
 
-def get_countdown_events(reader):
-    """Get all COUNTDOWN_START events.
-
-    Returns
-    -------
-    countdowns : pd.DataFrame
-
-    """
-    events = reader.load('events')
-    countdowns = events[events.type == 'COUNTDOWN_START']
-    return countdowns
-
-
 def countdown_to_resting(events, samplerate=1000):
     """Convert countdown events to "resting" events: this selects 3 EEG epochs
     of 1 s each starting at offsets of 1, 3, and 7 seconds from the beginning of
@@ -76,19 +62,21 @@ def countdown_to_resting(events, samplerate=1000):
                                   sample_rate=samplerate)
     msoffsets = []
     eegfiles = []
-    for _, event in events.iterrows():
+    for _, event in events.query("type == 'COUNTDOWN_START'").iterrows():
         msoffsets += [to_millis(event.eegoffset) + s * 1000 for s in (1, 4, 7)]
         eegfiles += [event.eegfile] * 3
     new_offsets = milliseconds_to_events(msoffsets, samplerate)
     new_events = pd.DataFrame({'eegfile': eegfiles,
-                              'eegoffset': new_offsets.values.squeeze(),
+                               'eegoffset': new_offsets.values.squeeze(),
                                'subject': events.subject.unique()[0],
                                'experiment': events.experiment.unique()[0],
                                'session': events.session.unique()[0]})
-    return new_events
+
+    return pd.concat([new_events, events.query("type != 'COUNTDOWN_START")])
 
 
-def read_eeg_data(reader, events, reref=True):
+# TODO: this is part of a broader set of CMLReaders wrappers
+def read_eeg_data(reader, events, reref=True, rel_start=0, rel_stop=1000):
     """Read EEG data from events in a single session.
 
     Parameters
@@ -106,10 +94,6 @@ def read_eeg_data(reader, events, reref=True):
     eeg
         EEG timeseries data.
 
-    Notes
-    -----
-    This assumes a countdown phase of at least 10 seconds in length.
-
     """
     from ptsa.data.filters import ButterworthFilter
     if reref:
@@ -117,10 +101,10 @@ def read_eeg_data(reader, events, reref=True):
     else:
         scheme = None
 
-    eeg = reader.load_eeg(events=events, rel_start=0, rel_stop=1000,
+    eeg = reader.load_eeg(events=events, rel_start=rel_start, rel_stop=rel_stop,
                           scheme=scheme)
     eeg.data = ButterworthFilter(timeseries=eeg.to_ptsa(),
-                                 freq_range=[58.,62.], filt_type='stop', order=4).filter().data
+                                 freq_range=[58., 62.], filt_type='stop', order=4).filter().data
     eeg = eeg.resample(256.)
     return eeg
 

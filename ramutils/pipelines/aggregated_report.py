@@ -68,7 +68,7 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None,
                 pre_built_results = load_existing_results(subject, experiment, sessions, True,
                                                           paths.data_db,
                                                           joint_report=False,
-                                                          rootdir=paths.root).compute()
+                                                          rootdir=paths.root)
                 if all([val is None for val in [pre_built_results['classifier_evaluation_results'],
                                                 pre_built_results['session_summaries'],
                                                 pre_built_results['math_summaries']]]):
@@ -91,7 +91,7 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None,
                 pre_built_results = load_existing_results(subject, experiment, sessions, True,
                                                           paths.data_db,
                                                           joint_report=False,
-                                                          rootdir=paths.root).compute()
+                                                          rootdir=paths.root)
                 # Check if only None values were returned. Processing will continue
                 # undeterred
                 if all([val is None for val in [pre_built_results['classifier_evaluation_results'],
@@ -120,7 +120,7 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None,
         pre_built_results = load_existing_results(subject, experiment, sessions, True,
                                                   paths.data_db,
                                                   joint_report=False,
-                                                  rootdir=paths.root).compute()
+                                                  rootdir=paths.root)
         if all([val is None for val in [pre_built_results['classifier_evaluation_results'],
                                         pre_built_results['session_summaries'],
                                         pre_built_results['math_summaries']]]):
@@ -153,4 +153,4 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None,
                                  save=True, aggregated_report=True)
 
     with PipelineCallback(pipeline_name):
-        return report.compute()
+        return report

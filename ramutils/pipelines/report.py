@@ -4,18 +4,12 @@ from collections import namedtuple
 import pandas as pd
 
 # TODO: import experiments file
-from ramutils.pipelines.experiments import generate_data_for_repfr_report, generate_data_for_dboy_report
+from ramutils.pipelines.experiments import generate_data_for_repfr_report, generate_data_for_dboy_report, ReportData
 from ramutils.events import dataframe_to_recarray
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
 from ramutils.stim_artifact import get_tstats
 from .hooks import PipelineCallback
-import json
-
-ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
-                                      'target_selection_table, classifier_evaluation_results,'
-                                      'trained_classifier, repetition_ratio_dict, '
-                                      'retrained_classifier, behavioral_results')
 
 experiment_mapping = {
             'RepFR': generate_data_for_repfr_report, 
@@ -87,10 +81,9 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
 
-    # FIXME
     if use_classifier_excluded_leads:
         classifier_excluded_leads = get_classifier_excluded_leads(
-            subject, ec_pairs, paths.root).compute()
+            subject, ec_pairs, paths.root)
         if stim_params is None:
             stim_params = []
         stim_params.extend(classifier_excluded_leads)
@@ -108,7 +101,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                            experiment,
                                                            sessions,
                                                            ec_pairs,
-                                                           root=paths.root).compute()
+                                                           root=paths.root)
 
     # all_events are used for producing math summaries. Task events are only
     # used by the stim reports. Non-stim reports create a different set of
@@ -124,7 +117,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                          paths,
                                                          joint_report,
                                                          sessions=sessions,
-                                                         **kwargs).compute()
+                                                         **kwargs)
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',
@@ -149,22 +142,40 @@ def make_report(subject, experiment, paths, joint_report=False,
                              data.math_summaries, data.classifier_evaluation_results,
                              paths.data_db,
                              target_selection_table=data.target_selection_table,
-                             behavioral_results=data.behavioral_results).compute()
+                             behavioral_results=data.behavioral_results)
         '''
 
         report = build_static_report(subject, experiment, data.session_summaries,
-                                 data.math_summaries, data.target_selection_table,
-                                 data.classifier_evaluation_results,
-                                  dest=paths.dest)
+                                     None, data.target_selection_table,
+                                     data.classifier_evaluation_results,
+                                     dest=paths.dest)
 
-        return report.compute()
+        return report
 
     if 'DBOY' in experiment:
         # return generate_dboy_report()
-        pass
+        data = generate_data_for_nonstim_report(subject, experiment, sessions,
+                                                joint_report, paths, ec_pairs,
+                                                used_pair_mask, excluded_pairs,
+                                                final_pairs, pairs_metadata_table,
+                                                all_events,
+                                                **kwargs)
 
+        output = save_all_output(subject, experiment, data.session_summaries,
+                                 data.math_summaries, data.classifier_evaluation_results,
+                                 paths.data_db,
+                                 retrained_classifier=data.retrained_classifier,
+                                 target_selection_table=data.target_selection_table,
+                                 behavioral_results=data.behavioral_results)
 
-    stim_report = is_stim_experiment(experiment).compute()
+        report = build_static_report(subject, experiment, data.session_summaries,
+                                     data.math_summaries, data.target_selection_table,
+                                     data.classifier_evaluation_results,
+                                     hmm_results=output, dest=paths.dest)
+
+        return report
+
+    stim_report = is_stim_experiment(experiment)
     series_num = extract_experiment_series(experiment)
 
     if not rerun:
@@ -172,7 +183,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         pre_built_results = load_existing_results(subject, experiment, sessions, stim_report,
                                                   paths.data_db,
                                                   joint_report,
-                                                  rootdir=paths.root).compute()
+                                                  rootdir=paths.root)
 
         # Check if only None values were returned. Processing will continue
         # undeterred
@@ -190,7 +201,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          pre_built_results['classifier_evaluation_results'],
                                          paths.dest,
                                          hmm_results=pre_built_results['hmm_results'])
-            return report.compute()
+            return report
 
     if not stim_report:
         data = generate_data_for_nonstim_report(subject, experiment, sessions,
@@ -228,7 +239,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                              paths.data_db,
                              retrained_classifier=data.retrained_classifier,
                              target_selection_table=data.target_selection_table,
-                             behavioral_results=data.behavioral_results).compute()
+                             behavioral_results=data.behavioral_results)
 
     report = build_static_report(subject, experiment, data.session_summaries,
                                  data.math_summaries, data.target_selection_table,
@@ -239,7 +250,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         report.visualize(filename=vispath)
 
     with PipelineCallback(pipeline_name):
-        return report.compute()
+        return report
 
 
 def generate_ps4_report(subject, experiment, sessions, ec_pairs,
@@ -264,7 +275,7 @@ def generate_ps4_report(subject, experiment, sessions, ec_pairs,
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, target_selection_table,
                                  classifier_evaluation_results, paths.dest)
-    return report.compute()
+    return report
 
 
 def generate_data_for_nonstim_report(subject, experiment, sessions,
@@ -309,7 +320,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                            'region']],
                                      [('label', 'S256'),
                                       ('location', 'S256'),
-                                      ('region', 'S256')])[used_pair_mask.compute()]
+                                      ('region', 'S256')])[used_pair_mask]
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
@@ -366,12 +377,13 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     classifier_evaluation_results = [encoding_classifier_summary,
                                      joint_classifier_summary]
 
-    data = ReportData(session_summaries, math_summaries, target_selection_table,
-                      classifier_evaluation_results, trained_classifier, repetition_ratio_dict,
-                      trained_classifier, None)
-
-    return data
-
+    return ReportData(session_summaries=session_summaries,
+                      math_summaries=math_summaries,
+                      target_selection_table=target_selection_table,
+                      classifier_evaluation_results=classifier_evaluation_results,
+                      trained_classifier=trained_classifier,
+                      repetition_ratio_dict=repetition_ratio_dict,
+                      retrained_classifier=trained_classifier)
 
 def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                   paths, ec_pairs, excluded_pairs,
@@ -410,7 +422,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     used_classifiers = reload_used_classifiers(subject,
                                                experiment,
                                                final_task_events,
-                                               paths.root).compute()
+                                               paths.root)
 
     # Retraining occurs on-demand or if any session-specific classifiers
     # failed to load.
@@ -464,7 +476,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                             used_pair_mask)
 
     pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
-        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, 0.04, 0.4, return_pvalues=True).compute()
+        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, 0.04, 0.4, return_pvalues=True)
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,
@@ -487,11 +499,12 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
     classifier_evaluation_results = post_hoc_results[
         'classifier_summaries']
-    data = ReportData(session_summaries, math_summaries, None,
-                      classifier_evaluation_results, None, None,
-                      retrained_classifier, behavioral_results)
 
-    return data
+    return ReportData(session_summaries=session_summaries,
+                      math_summaries=math_summaries,
+                      classifier_evaluation_results=classifier_evaluation_results,
+                      retrained_classifier=retrained_classifier,
+                      behavioral_results=behavioral_results)
 
 
 def generate_data_for_location_search_report(subject, experiment,
@@ -504,13 +517,14 @@ def generate_data_for_location_search_report(subject, experiment,
     connectivity = get_resting_connectivity(
         subject, rootdir=paths.root
     )
+
     stim_events = all_events[all_events.type == 'STIM_ON']
 
     post_stim_eeg = load_post_stim_eeg(stim_events, bipolar_pairs=ec_pairs, **kwargs)
 
     pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
         all_events[all_events['type'] == 'STIM_ON'], ec_pairs,
-        0.05, 0.3, return_pvalues=True, before_experiment=False).compute()
+        0.05, 0.3, return_pvalues=True, before_experiment=False)
 
     session_summaries = summarize_location_search_sessions(all_events,
                                                            stim_data,
@@ -520,8 +534,7 @@ def generate_data_for_location_search_report(subject, experiment,
                                                            post_stim_eeg=post_stim_eeg,
                                                            rootdir=paths.root
                                                            )
-    return ReportData(session_summaries, [], None,
-                      [], None, dict(), None, dict())
+    return ReportData(session_summaries=session_summaries)
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
@@ -550,7 +563,7 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
                                              frequency_mask=trigger_frequency_mask)
 
     powers, final_task_events = compute_normalized_powers(
-        task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
+        task_events, bipolar_pairs=ec_pairs, **kwargs)
     reduced_powers = reduce_powers(powers, trigger_electrode_mask,
                                    len(kwargs['freqs']),
                                    frequency_mask=trigger_frequency_mask)
@@ -561,12 +574,10 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
                                                 ec_pairs, excluded_pairs,
                                                 powers,
                                                 trigger_output=reduced_powers,
-                                                post_stim_trigger_output=post_stim_reduced_powers).compute()
+                                                post_stim_trigger_output=post_stim_reduced_powers)
     math_summaries = summarize_math(all_events)
     classifier_evaluation_results = []
 
-    data = ReportData(session_summaries, math_summaries, None,
-                      classifier_evaluation_results, None, None,
-                      None, None)
-
-    return data
+    return ReportData(session_summaries=session_summaries,
+                      math_summaries=math_summaries,
+                      classifier_evaluation_results=classifier_evaluation_results)

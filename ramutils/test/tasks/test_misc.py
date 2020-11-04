@@ -17,7 +17,7 @@ def test_build_report_from_cached_results():
 
     prior_results = load_existing_results(
         'R1354E', 'FR1', [1], False, datafile('input/report_db'),
-        datafile('')).compute()
+        datafile(''))
 
     assert prior_results['session_summaries'] is not None
     assert prior_results['classifier_evaluation_results'] is not None
@@ -28,7 +28,7 @@ def test_build_report_from_cached_results():
                                  prior_results['math_summaries'],
                                  prior_results['target_selection_table'],
                                  prior_results['classifier_evaluation_results'],
-                                 datafile('output/')).compute()
+                                 datafile('output/'))
 
     assert report is not None
     output_files = glob.glob(datafile('output/*.html'))
@@ -43,7 +43,7 @@ def test_build_report_from_cached_results():
         'R1345D', 'FR1', [1], False,
         db_loc=datafile('input/report_db'),
         joint_report=False,
-        rootdir=datafile('')).compute()
+        rootdir=datafile(''))
 
     results = [v for k, v in prior_results.items()]
 

@@ -23,7 +23,7 @@ def _log_call(func, with_args=True):
     return wrapper
 
 
-def task(cache=True, log_args=False, nout=None):
+def task(cache=False, log_args=True, nout=None):
     """Decorator to define a task.
 
     Keyword arguments
@@ -41,12 +41,15 @@ def task(cache=True, log_args=False, nout=None):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             wrapped = _log_call(func, log_args)
-            if cache:
-                wrapped = delayed(memory.cache(wrapped),
-                                  nout=nout)(*args, **kwargs)
-            else:
-                wrapped = delayed(wrapped, nout=nout)(*args, **kwargs)
-            return wrapped
+            return wrapped(*args, **kwargs)
+
+            #if cache:
+                #wrapped = delayed(memory.cache(wrapped),
+                                  #nout=nout)(*args, **kwargs)
+            #else:
+                #wrapped = delayed(wrapped, nout=nout)(*args, **kwargs)
+            #return wrapped
+
         return wrapper
     return decorator
 

@@ -316,8 +316,7 @@ class ReportGenerator(object):
                 'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifier_summaries],
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
-            plot_data['tags'] = [
-                classifier.id for classifier in self.classifier_summaries],
+            plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
 
         return json.dumps(plot_data)
 
@@ -440,10 +439,12 @@ class ReportGenerator(object):
         return self._render(
                 'repFR1',
                 stim=False,
-                combined_summary=self._make_repfr_summary(), # TODO
-                plot_data=self._make_plot_data(stim=False, classifier=False, biomarker_delta=False), # TODO
-                sme_table=self._make_target_selection_table(), # TODO
-                feature_data=self._make_feature_plots()  # TODO
+                combined_summary=self._make_repfr_summary(),
+                classifiers=self._make_classifier_data(),
+                plot_data=self._make_plot_data(stim=False, classifier=True, biomarker_delta=False),
+                sme_table=self._make_target_selection_table(),
+                hmm_results=self.hmm_results,
+                feature_data=self._make_feature_plots()
             )
 
     def generate_closed_loop_fr_report(self, experiment):

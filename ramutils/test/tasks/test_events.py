@@ -35,7 +35,7 @@ class TestEvents:
         paths = FilePaths(root=rhino_root)
         extra_kwargs = params().to_dict()
         actual_events = build_training_data(subject, experiment, paths,
-                                            **extra_kwargs).compute()
+                                            **extra_kwargs)
         assert len(actual_events) == len(expected_events)
         assert np.array_equal(actual_events.recalled,
                               expected_events.recalled)
@@ -60,7 +60,7 @@ class TestEvents:
         extra_kwargs = params().to_dict()
 
         current_events = build_training_data(subject, experiment, paths,
-                                             **extra_kwargs).compute()
+                                             **extra_kwargs)
 
         expected_events = load_event_test_data(expected, rhino_root)
         assert len(current_events) == len(expected_events)
@@ -100,7 +100,7 @@ class TestEvents:
 
         all_events, task_events, stim_params = build_test_data(
             subject, experiment, paths, joint_report=joint_report,
-            sessions=sessions, **extra_kwargs).compute()
+            sessions=sessions, **extra_kwargs)
 
         expected_events = load_event_test_data(expected, rhino_root)
         assert len(expected_events) == len(task_events)
@@ -109,5 +109,5 @@ class TestEvents:
     @pytest.mark.rhino
     def test_build_ps_events(self, rhino_root):
         actual = build_ps_data('R1275D', 'PS4_catFR', 'ps4_events', None,
-                               rhino_root).compute()
+                               rhino_root)
         assert len(actual) == 8458

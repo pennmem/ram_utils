@@ -59,7 +59,7 @@ normalized_powers = pytest.fixture(scope='session')(_normalized_powers)
 @pytest.fixture()
 def ps_events(rhino_root):
     ps_events = build_ps_data('R1364C', 'PS4_FR', 'ps4_events', None,
-                              rhino_root).compute()
+                              rhino_root)
     return ps_events
 
 

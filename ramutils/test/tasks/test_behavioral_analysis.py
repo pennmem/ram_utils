@@ -41,5 +41,5 @@ def test_estimate_effects_of_stim(bipolar_pairs, excluded_pairs,
                             normalized_powers)
     sample_summaries = [sample_summary]
     result_traces = estimate_effects_of_stim('R1374T', 'catFR5',
-                                             sample_summaries).compute()
+                                             sample_summaries)
     assert len(result_traces) == 3

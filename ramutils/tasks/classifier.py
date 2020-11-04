@@ -3,11 +3,11 @@ from __future__ import division
 import numpy as np
 from classiflib import ClassifierContainer
 from sklearn.metrics import roc_auc_score
+from sklearn.linear_model.logistic import LogisticRegression
 
 from ramutils.classifier.cross_validation import permuted_loso_cross_validation, \
     permuted_lolo_cross_validation, perform_cross_validation
 from ramutils.classifier.utils import reload_classifier
-from ramutils.classifier.utils import train_classifier as train_classifier_core
 from ramutils.classifier.weighting import \
     get_sample_weights as get_sample_weights_core
 from ramutils.events import extract_sessions, get_nonstim_events_mask, \
@@ -41,8 +41,33 @@ def get_sample_weights(events, **kwargs):
 @task()
 def train_classifier(pow_mat, events, sample_weights, penalty_param,
                      penalty_type, solver):
-    classifier = train_classifier_core(pow_mat, events, sample_weights,
-                                       penalty_param, penalty_type, solver)
+
+    """Train a classifier.
+
+    Parameters
+    ----------
+    pow_mat : np.ndarray
+    events : np.recarray
+    sample_weights : np.ndarray
+    penalty_param: Float
+        Penalty parameter to use
+    penalty_type: str
+        Type of penalty to use for regularized model (ex: L2)
+    solver: str
+        Solver to use when fitting the model (ex: liblinear)
+
+    Returns
+    -------
+    classifier : LogisticRegression
+        Trained classifier
+
+    """
+    recalls = events.recalled
+    classifier = LogisticRegression(C=penalty_param,
+                                    penalty=penalty_type,
+                                    solver=solver,
+                                    class_weight='balanced')
+    classifier.fit(pow_mat, recalls, sample_weights)
     return classifier
 
 

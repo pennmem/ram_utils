@@ -257,6 +257,9 @@ var ramutils = (function (mod, Plotly) {
           title: 'Recall change from mean (%)',
           anchor: 'x2'
         },
+        legend: {
+            x: 1,
+        },
 
         showlegend: true,
 
