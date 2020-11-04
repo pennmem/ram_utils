@@ -35,7 +35,8 @@ logger = get_logger()
 def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
                               localization=0, montage=0,
                               default_surface_area=0.001,
-                              use_common_reference=False):
+                              use_common_reference=False,
+                              ignore_labels=[]):
     """Generate electrode configuration files (CSV and binary).
 
     Parameters
@@ -56,6 +57,8 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
         area file can be found.
     use_common_reference : bool
         Use common reference instead of bipolar referencing scheme.
+    ignore_labels: list or tuple
+        Labels to ignore from jacksheet
 
     Returns
     -------
@@ -83,8 +86,9 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
             area = default_surface_area
 
     scheme = 'monopolar' if use_common_reference else 'bipolar'
+
     ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area,
-                                        scheme=scheme)
+                                        scheme=scheme, ignore_labels=ignore_labels)
 
     if anodes is not None:
         assert cathodes is not None
@@ -308,7 +312,7 @@ def _make_artifact_detection_section(experiment):
 def generate_ramulator_config(subject, experiment, container, stim_params,
                               paths, pairs=None, excluded_pairs=None,
                               exp_params=None, extended_blanking=True,
-                              trigger_pairs=None):
+                              trigger_pairs=None, ignore_labels=[]):
     """Create configuration files for Ramulator.
 
     In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``
