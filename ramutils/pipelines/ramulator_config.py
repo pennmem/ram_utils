@@ -113,7 +113,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                           localization, montage,
                                           default_surface_area,
                                           use_common_reference,
-                                          ignore_labels).compute()
+                                          ignore_labels)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
