@@ -383,7 +383,8 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                       classifier_evaluation_results=classifier_evaluation_results,
                       trained_classifier=trained_classifier,
                       repetition_ratio_dict=repetition_ratio_dict,
-                      retrained_classifier=trained_classifier)
+                      retrained_classifier=trained_classifier,
+                      behavioral_results=None)
 
 def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                   paths, ec_pairs, excluded_pairs,
