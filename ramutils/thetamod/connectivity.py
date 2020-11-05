@@ -72,7 +72,8 @@ def countdown_to_resting(events, samplerate=1000):
                                'experiment': events.experiment.unique()[0],
                                'session': events.session.unique()[0]})
 
-    return pd.concat([new_events, events.query("type != 'COUNTDOWN_START'")])
+    new_events = pd.concat([new_events, events.query("type != 'COUNTDOWN_START'")])
+    return new_events.astype({"eegoffset": int, "msoffset": int, "mstime": int})
 
 
 # TODO: this is part of a broader set of CMLReaders wrappers
