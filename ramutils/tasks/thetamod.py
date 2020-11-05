@@ -131,7 +131,7 @@ def get_resting_connectivity(subject, rootdir) -> np.ndarray:
     sessions = df.query("subject == @subject & experiment in ['FR1, catFR1', 'LocationSearch']")
 
     if len(sessions):
-        for session in sessions.iterrows():
+        for _, session in sessions.iterrows():
             reader = get_reader(subject=session.subject, experiment=session.experiment, session=session.session)
             rate = reader.load('sources')['sample_rate']
             reref = not reader.load('sources')['name'].endswith('.h5')
