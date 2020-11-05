@@ -132,10 +132,10 @@ def get_resting_connectivity(subject, rootdir) -> np.ndarray:
 
     if len(sessions):
         for _, session in sessions.iterrows():
-            reader = get_reader(subject=session.subject, experiment=session.experiment, session=session.session)
+            reader = get_reader(subject=session.subject, experiment=session.experiment, session=session.session, rootdir=rootdir)
             rate = reader.load('sources')['sample_rate']
             reref = not reader.load('sources')['name'].endswith('.h5')
-            events = reader.load('events').query("type in ['COUNTDOWN_START', 'SHAM']")
+            events = reader.load('task_events').query("type in ['COUNTDOWN_START', 'SHAM']")
             resting = connectivity.countdown_to_resting(events, rate)
             eeg = connectivity.read_eeg_data(reader, resting, reref=reref)
             eeg_data.append(eeg)
