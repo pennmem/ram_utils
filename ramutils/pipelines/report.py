@@ -535,7 +535,14 @@ def generate_data_for_location_search_report(subject, experiment,
                                                            post_stim_eeg=post_stim_eeg,
                                                            rootdir=paths.root
                                                            )
-    return ReportData(session_summaries=session_summaries)
+    return ReportData(session_summaries=session_summaries,
+                        math_summaries=[], 
+                        target_selection_table=None,
+                        classifier_evaluation_results=[], 
+                        trained_classifier=None, 
+                        repetition_ratio_dict=dict(), 
+                        retrained_classifier=None, 
+                        behavioral_results=dict())
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
