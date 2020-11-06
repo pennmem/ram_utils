@@ -140,7 +140,13 @@ def summarize_nonstim_sessions(all_events, task_events,
                              raw_events=session_all_events)
 
         elif experiment in ['DBOY1']:
-            raise NotImplementedError("Courier not implemented")
+            summary = FRSessionSummary()
+            summary.populate(session_task_events,
+                             bipolar_pairs,
+                             excluded_pairs,
+                             session_powers,
+                             raw_events=session_all_events)
+
         else:
             raise UnsupportedExperimentError(
                 "Unsupported experiment: {}".format(experiment))
