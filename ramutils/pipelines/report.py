@@ -137,14 +137,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                 final_pairs, pairs_metadata_table,
                                                 all_events, **kwargs)
         
-        '''
-        output = save_all_output(subject, experiment, data.session_summaries,
-                             data.math_summaries, data.classifier_evaluation_results,
-                             paths.data_db,
-                             target_selection_table=data.target_selection_table,
-                             behavioral_results=data.behavioral_results)
-        '''
-
         report = build_static_report(subject, experiment, data.session_summaries,
                                      None, data.target_selection_table,
                                      data.classifier_evaluation_results,
@@ -153,25 +145,16 @@ def make_report(subject, experiment, paths, joint_report=False,
         return report
 
     if 'DBOY' in experiment:
-        # return generate_dboy_report()
-        data = generate_data_for_nonstim_report(subject, experiment, sessions,
-                                                joint_report, paths, ec_pairs,
-                                                used_pair_mask, excluded_pairs,
-                                                final_pairs, pairs_metadata_table,
-                                                all_events,
-                                                **kwargs)
-
-        output = save_all_output(subject, experiment, data.session_summaries,
-                                 data.math_summaries, data.classifier_evaluation_results,
-                                 paths.data_db,
-                                 retrained_classifier=data.retrained_classifier,
-                                 target_selection_table=data.target_selection_table,
-                                 behavioral_results=data.behavioral_results)
+        data = generate_data_for_dboy_report(subject, experiment, sessions,
+                                             joint_report, paths, ec_pairs,
+                                             used_pair_mask, excluded_pairs,
+                                             final_pairs, pairs_metadata_table,
+                                             all_events, **kwargs)
 
         report = build_static_report(subject, experiment, data.session_summaries,
-                                     data.math_summaries, data.target_selection_table,
+                                     None, data.target_selection_table,
                                      data.classifier_evaluation_results,
-                                     hmm_results=output, dest=paths.dest)
+                                     dest=paths.dest)
 
         return report
 

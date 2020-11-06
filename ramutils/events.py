@@ -163,6 +163,11 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     events = remove_voice_detection(events)
 
+    # needed for DBOY 1, normalization should be improved to
+    # standardaze events without these ad hoc corrections
+    events = rename_fields(events, {"trial": "list"})
+    events = change_field_type(events, {"mstime": np.int32, "rectime": np.int32, "eegoffset": np.int32})
+
     # Only for PS5 do we want to keep the practice list around so we can know
     # what the baseline mean power was for the session, but we still need to get
     # rid of the events with -999 for list
@@ -179,7 +184,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     # separate_stim_events is called within the task-specific functions
     # because the columns to subset differs by task
-    if "FR" in experiment:
+    if "FR" in experiment or 'DBOY' in experiment:
         events, stim_params = separate_stim_events(events)
         if "TICL" not in experiment:
             events = insert_baseline_retrieval_events(events,
@@ -334,6 +339,9 @@ def rename_correct_to_recalled(events):
 
     return events
 
+def change_field_type(events, mapping_dict):
+    return events.astype([(d[0], mapping_dict[d[0]]) if d[0] in mapping_dict else d for d in events.dtype.descr])
+
 
 def add_field(events, field_name, default_val, dtype):
     """ Add field to the recarray
@@ -428,7 +436,7 @@ def remove_incomplete_lists(events):
         events_by_list = (np.array([l for l in list_group]) for listno,
                           list_group in
                           groupby(final_sess_events, lambda x: x.list))
-        list_has_end = [any([l['type'] == 'REC_END' for l in list_group]) or
+        list_has_end = [any([l['type'] in ['REC_END', 'REC_STOP'] for l in list_group]) or
                         listno == -999 for listno, list_group in groupby(
             final_sess_events, lambda x:x.list)]
 
@@ -632,7 +640,7 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
-        'iscorrect', 'phase', 'matched', 'is_repeat', 'repeats'
+        'iscorrect', 'phase', 'matched', 'is_repeat', 'repeats', 'item', 'trial'
     ]
 
     if all_relevant:
@@ -1637,6 +1645,7 @@ def get_all_retrieval_events_mask(events):
     all_retrieval_mask = ((events.type == 'REC_WORD') |
                           (events.type == 'REC_BASE') |
                           (events.type == 'REC_EVENT'))
+
     if 'matched' not in events.dtype.names:
         return all_retrieval_mask
     matched_mask = events['matched']

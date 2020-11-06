@@ -652,7 +652,7 @@ class DeliberationEventCreator(RetrievalEventCreator):
             # Ensure the points to be invalidated are within the boundaries of the recall period
             invalid_points = invalid_points[np.where(invalid_points >= 0)]
             invalid_points = invalid_points[np.where(invalid_points < recall_period)]
-            invalid_points = (np.unique(invalid_points),)  # ((),) similiar to np.where output
+            invalid_points = (np.unique(invalid_points).astype(np.int32),)  # ((),) similiar to np.where output
 
             # Removes initial recall contamination (-remove_before_recall,+remove_after_recall)
             baseline_array[index][invalid_points] = invalid

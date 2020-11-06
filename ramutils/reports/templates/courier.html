@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ subject }} RAM FR1 Report
+{% endblock %}
+
+{% block report %}
+{% include 'session_summary.html' %}
+{% include 'serialpos_curve.html' %}
+{% if joint %}
+  {% include 'categorical.html' %}
+{% endif %}
+{% include 'classifier.html' %}
+{% include 'feature_plot_img.html' %}
+{% include 'sme.html' %}
+{% endblock %}

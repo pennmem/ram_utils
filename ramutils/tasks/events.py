@@ -81,6 +81,17 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                           pre=kwargs['pre_event_buf'],
                                           post=kwargs['post_event_buf'])
 
+    elif "DBOY1" in experiment and not kwargs['combine_events']:
+        free_recall_events = load_events(subject, experiment, sessions=sessions,
+                                         rootdir=paths.root)
+
+        free_recall_events = clean_events(free_recall_events,
+                                          start_time=kwargs['baseline_removal_start_time'],
+                                          end_time=kwargs['retrieval_time'],
+                                          duration=kwargs['empty_epoch_duration'],
+                                          pre=kwargs['pre_event_buf'],
+                                          post=kwargs['post_event_buf'])
+
     if ("PAL" in experiment) and kwargs['combine_events']:
         all_task_events = concatenate_events_across_experiments([
             free_recall_events, cleaned_pal_events])
@@ -147,6 +158,16 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
             duration=kwargs['empty_epoch_duration'],
             pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
             return_stim_events=True)
+
+    elif 'DBOY1' in experiment:
+        all_events = load_events(subject, experiment, sessions=sessions,
+                                 rootdir=paths.root)
+        task_events, stim_params = clean_events(
+                all_events, start_time=kwargs['baseline_removal_start_time'],
+                end_time=kwargs['retrieval_time'],
+                duration=kwargs['empty_epoch_duration'],
+                pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
+                return_stim_events=True)
 
     elif 'LocationSearch' in experiment:
         all_events = load_events(subject,experiment,sessions=sessions,

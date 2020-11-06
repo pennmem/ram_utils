@@ -326,6 +326,10 @@ class ReportGenerator(object):
 
         """
         series = extract_experiment_series(self.experiment)
+        joint = False
+        if any(['catFR' in exp for exp in self.experiments]):
+            joint = True
+
         if all(['PS4' in exp for exp in self.experiments]):
             return self.generate_ps4_report()
 
@@ -342,10 +346,10 @@ class ReportGenerator(object):
         elif all(['RepFR1' in exp for exp in self.experiments]):
             return self.generate_repfr1_report()
 
+        elif all(['DBOY' in exp for exp in self.experiments]):
+            return self.generate_courier_report(joint=joint)
+
         elif series == '1':
-            joint = False
-            if any(['catFR' in exp for exp in self.experiments]):
-                joint = True
             return self.generate_record_only_report(joint=joint)
 
         elif series == '2':
@@ -425,6 +429,19 @@ class ReportGenerator(object):
             plot_data=self._make_plot_data(stim=True, classifier=False,
                                            biomarker_delta=False)
 
+        )
+
+    def generate_courier_report(self, joint):
+        return self._render(
+                'Courier',
+                stim=False,
+                combined_summary=self._make_combined_summary(),
+                classifiers=self._make_classifier_data(),
+                plot_data=self._make_plot_data(stim=False, classifier=True,
+                                               joint=joint),
+                sme_table=self._make_target_selection_table(),
+                feature_data=self._make_feature_plots(),
+                joint=joint
         )
 
     def generate_repfr1_report(self):
