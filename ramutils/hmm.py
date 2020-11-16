@@ -69,9 +69,11 @@ class HierarchicalModel(object):
             A MultiTrace object that contains the samples
 
         """
-        method_str = "_fit_{}_model".format(self.experiment)
-        dispatch_method = getattr(self, method_str)
-        return dispatch_method(draws, tune)
+        import pymc3 as pm
+
+        with self.model:
+            self.trace = pm.sample(draws=draws, tune=tune)[tune:]
+        return self.trace
 
     def _build_baseline_model(self):
         import pymc3 as pm
@@ -124,41 +126,6 @@ class HierarchicalModel(object):
                                   observed=self.data.recalled)
 
         return model
-
-    def _fit_FR2_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_catFR2_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_FR3_model(self, draws, tune):
-        import pymc3 as pm
-
-        with self.model:
-            self.trace = pm.sample(draws=draws, tune=tune)[tune:]
-        return self.trace
-
-    def _fit_catFR3_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_FR5_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_catFR5_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_FR6_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_catFR6_model(self, draws, tune):
-        return self._fit_FR3_model(draws, tune)
-
-    def _fit_TICL_FR_model(self,draws,tune):
-        return self._fit_FR3_model(draws,tune)
-
-    def _fit_TICL_catFR_model(self,draws,tune):
-        return self._fit_FR3_model(draws,tune)
-
 
 def save_traceplot(trace, full_path):
     import pymc3 as pm
