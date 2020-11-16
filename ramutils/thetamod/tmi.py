@@ -7,6 +7,7 @@ from scipy.special import logit
 from scipy.stats import ttest_rel, pearsonr
 import statsmodels.formula.api as sm
 import cmlreaders
+import itertools
 
 def get_stim_events(reader):
     """Get all stim events.
@@ -27,7 +28,7 @@ def get_stim_events(reader):
     return stim_events
 
 
-def get_stim_channels(pairs, stim_events, anode_name_field='anode_label', cathode_name_field='cathod_label'):
+def get_stim_channels(pairs, stim_events, anode_name_field='anode_label', cathode_name_field='cathode_label'):
     """Extract unique stim channels from stim events.
 
     Parameters
@@ -59,7 +60,7 @@ def get_stim_channels(pairs, stim_events, anode_name_field='anode_label', cathod
         for _, row in stim_params.iterrows()
     ])
 
-    indices = [pairs[pairs.label == label].index[0] for label in labels]
+    indices = [pairs[pairs.label == label].index[0] for label in labels if label in pairs.label.values]
 
     return indices
 

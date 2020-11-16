@@ -1599,7 +1599,7 @@ class LocationSearchSessionSummary(StimSessionSummary):
 
     @property
     def id(self):
-        return ":".join([self.subject, self.experiment,self.session_number,self.stim_tag])
+        return ":".join([self.subject, self.experiment, self.session_number,self.stim_tag])
 
     @property
     def tmi(self):

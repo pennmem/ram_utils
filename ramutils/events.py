@@ -84,8 +84,9 @@ def load_events(subject, experiment, file_type='all_events',
 
     # Update the paths based on the given root directory. This makes it easier
     # to run tests and use a mounted file system
-    event_files = [os.path.join(rootdir, event_file) for event_file in
-                   event_files]
+    # 10.9.20: cmlreaders makes this obsolete, as
+    # event_files = [os.path.join(rootdir, event_file) for event_file in
+                   #event_files]
 
     if len(event_files) == 0:
         empty_recarray = initialize_empty_event_reccarray()

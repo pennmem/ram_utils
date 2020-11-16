@@ -18,6 +18,7 @@ from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
 from ramutils.tasks.thetamod import get_psd_data
+from os.path import basename
 
 logger = get_logger()
 
@@ -301,7 +302,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 stim_events, bipolar_pairs,
                 excluded_pairs, trigger_output, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_trigger_output)
-        elif experiment == "TICL_FR":
+        elif experiment in ["TICL_FR", "TICL_catFR"]:
             biomarker_events = extract_biomarker_information(
                 all_session_stim_events)
             stim_events = dataframe_to_recarray(stim_df,expected_dtypes)
@@ -390,6 +391,10 @@ def summarize_location_search_sessions(all_events, stim_params, pairs_metadata_t
 
     stim_param_df.drop(columns='anode_number', inplace=True)
     events_df = pd.DataFrame(all_events)
+
+    # need to remove path to load eeg with cmlreaders
+    events_df["eegfile"] = events_df["eegfile"].apply(lambda x: basename(x))
+
     events_df = events_df.loc[events_df['type'] == 'STIM_ON']
     events_df.drop(columns=['phase', ], inplace=True)
     events_df = events_df.merge(stim_param_df, how='left', left_index=True, right_index=True,).reset_index(drop=True)

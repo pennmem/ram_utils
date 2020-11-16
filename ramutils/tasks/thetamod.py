@@ -42,8 +42,10 @@ def get_psd_data(stim_events, rootdir):
         stim_events
     )
     reader = get_reader(subject,experiment,sessions[0],rootdir)
-    pre_eeg, post_eeg = (tmi.get_eeg(which, reader, stim_events)
-                         for which in ('pre', 'post'))
+
+    pre_eeg = tmi.get_eeg('pre', reader, stim_events)
+    post_eeg = tmi.get_eeg('post', reader, stim_events)
+
     pre_psd = tmi.compute_psd(pre_eeg)
     post_psd = tmi.compute_psd(post_eeg)
     bad_events_mask = artifact.get_bad_events_mask(post_eeg.data,
@@ -129,10 +131,26 @@ def get_resting_connectivity(subject, rootdir) -> np.ndarray:
 
     # TODO: add repFR1 to the list of baseline experiments
     # TODO: make this contingent, see ASANA
-    sessions = df.query("subject == @subject & experiment in ['FR1, catFR1', 'LocationSearch']")
+    sessions = df.query("subject == @subject & experiment in ['FR1, catFR1', 'LocationSearch', 'RepFR1']")
+    experiments = sessions.experiment.unique()
+
+    if 'FR1' in experiments:
+        sessions = sessions.query("experiment == 'FR1'")
+    elif 'catFR1' in experiments:
+        sessions = sessions.query("experiment == 'catFR1'")
+    elif 'LocationSearch' in experiments:
+        sessions = sessions.query("experiment == 'LocationSearch'")
+    elif 'RepFR1' in experiments:
+        sessions = sessions.query("experiment == 'RepFR1'")
+    else:
+        raise Exception("No experiments found for baseline connectivity")
+
 
     if len(sessions):
         for _, session in sessions.iterrows():
+            # rootdir is omitted here, as the root
+            # is already established
+
             reader = get_reader(subject=session.subject,
                                 experiment=session.experiment,
                                 session=session.session,
