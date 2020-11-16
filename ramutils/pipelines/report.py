@@ -201,6 +201,8 @@ def make_report(subject, experiment, paths, joint_report=False,
                                             task_events, stim_data, paths,
                                             **kwargs)
     elif "LocationSearch" in experiment:
+        import dask.config
+        dask.config.set(scheduler="synchronous")
         data = generate_data_for_location_search_report(
             subject, experiment, pairs_metadata_table, ec_pairs,excluded_pairs,
             all_events, stim_data, paths, **kwargs
@@ -516,14 +518,14 @@ def generate_data_for_location_search_report(subject, experiment,
                                                            post_stim_eeg=post_stim_eeg,
                                                            rootdir=paths.root
                                                            )
-    return ReportData(session_summaries = session_summaries,
-                      math_summaries = [],
-                      target_selection_table = None,
-                      classifier_evaluation_results = [],
-                      trained_classifier = None,
-                      repetition_ratio_dict = {},
-                      retrained_classifier = None,
-                      behavioral_results = {})
+    return ReportData(session_summaries=session_summaries,
+                        math_summaries=[], 
+                        target_selection_table=None,
+                        classifier_evaluation_results=[], 
+                        trained_classifier=None, 
+                        repetition_ratio_dict=dict(), 
+                        retrained_classifier=None, 
+                        behavioral_results=dict())
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
