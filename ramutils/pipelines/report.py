@@ -484,9 +484,17 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     classifier_evaluation_results = post_hoc_results[
         'classifier_summaries']
 
+    'session_summaries, math_summaries, '
+    'target_selection_table, classifier_evaluation_results,'
+    'trained_classifier, repetition_ratio_dict, '
+    'retrained_classifier, behavioral_results'
+
     return ReportData(session_summaries=session_summaries,
                       math_summaries=math_summaries,
+                      target_selection_table=None,
                       classifier_evaluation_results=classifier_evaluation_results,
+                      trained_classifier=None,
+                      repetition_ratio_dict={},
                       retrained_classifier=retrained_classifier,
                       behavioral_results=behavioral_results)
 

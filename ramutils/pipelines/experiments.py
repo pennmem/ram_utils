@@ -8,6 +8,12 @@ from .hooks import PipelineCallback
 import json
 
 
+# Old fields:
+# 'session_summaries, math_summaries, '
+#                                       'target_selection_table, classifier_evaluation_results,'
+#                                       'trained_classifier, repetition_ratio_dict, '
+#                                       'retrained_classifier, behavioral_results')
+
 class ReportData:
     '''
     Intermediate datastructure from which the report is generated. Thus,

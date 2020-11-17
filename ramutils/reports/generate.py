@@ -342,6 +342,9 @@ class ReportGenerator(object):
         elif all(['TICL_FR' in exp for exp in self.experiments]):
             return self.generate_closed_loop_fr_report('TICL_FR')
 
+        elif all(['TICL_catFR' in exp for exp in self.experiments]):
+            return self.generate_closed_loop_fr_report('TICL_catFR')
+
         # TODO: make this a neater mapping for other experiments
         elif all(['RepFR1' in exp for exp in self.experiments]):
             return self.generate_repfr1_report()
