@@ -205,14 +205,10 @@ class ReportGenerator(object):
                 # bins is returned as categorical
                 'serialpos': serialpos_data["bin"].astype(int).tolist(),
                 'overall': {
-                    # 'Overall': [replace_nan(a) for a in serialpos_data[0]],
-                    'One Presentation': serialpos_data[1].tolist(),
-                    'Two Presentation': serialpos_data[2].tolist(),
-                    'Three Presentation': serialpos_data[3].tolist(),
+                    'One Presentation (binned)': serialpos_data[1].tolist(),
+                    'Two Presentation (binned)': serialpos_data[2].tolist(),
+                    'Three Presentation (binned)': serialpos_data[3].tolist(),
                 },
-                # 'first': {
-                #     'One Presentation': [replace_nan(a) for a in first_serialpos_data[1]],
-                # }
             }
         elif not stim:
             plot_data['serialpos'] = {
