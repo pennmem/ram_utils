@@ -161,7 +161,7 @@ class ReportGenerator(object):
     def _make_repfr_summary(self):
             summary = self._make_combined_summary()
 
-            summary['presentation_counts'] = [1,2,3]
+            summary['presentation_counts'] = [1, 2, 3]
             summary.update({"{}p_words".format(p): sum([s.get_num_words(p) for s in self.session_summaries]) 
                             for p in summary['presentation_counts']})
 
@@ -197,22 +197,18 @@ class ReportGenerator(object):
         plot_data = {}
         # TODO: another place to fix the workarounds
         if "RepFR" in self.experiment:
-            serialpos_data = repFRSessionSummary.serialpos_probabilities(
-                    self.session_summaries, first=False)
+            serialpos_data = repFRSessionSummary.serialpos_probabilities(self.session_summaries)
 
-            # first_serialpos_data = repFRSessionSummary.serialpos_probabilities(
-            #         self.session_summaries, first=True)
-
-            def replace_nan(x): return None if np.isnan(x) else x 
+            def replace_nan(x): return None if np.isnan(x) else x
 
             plot_data['serialpos'] = {
-                #TODO: make this based on experiment configs
-                'serialpos': list(range(1, 28)),
+                # bins is returned as categorical
+                'serialpos': serialpos_data["bin"].astype(int).tolist(),
                 'overall': {
                     # 'Overall': [replace_nan(a) for a in serialpos_data[0]],
-                    'One Presentation': [replace_nan(a) for a in serialpos_data[1]],
-                    # 'Two Presentations': [replace_nan(a) for a in serialpos_data[2]],
-                    # 'Three Presentations': [replace_nan(a) for a in serialpos_data[3]]
+                    'One Presentation': serialpos_data[1].tolist(),
+                    'Two Presentation': serialpos_data[2].tolist(),
+                    'Three Presentation': serialpos_data[3].tolist(),
                 },
                 # 'first': {
                 #     'One Presentation': [replace_nan(a) for a in first_serialpos_data[1]],

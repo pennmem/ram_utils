@@ -766,50 +766,30 @@ class repFRSessionSummary(FRSessionSummary):
         return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats)
                         & (self.events.is_repeat == False)])
 
-
     def get_num_correct(self, repeats):
         return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats)
                         &(self.events.recalled == 1) & (self.events.is_repeat == False)])
 
+    @staticmethod
+    def spacing_effect(summaries):
+        raise NotImplementedError("TODO")
 
     @staticmethod
-    def serialpos_probabilities(summaries, first=False):
+    def serialpos_probabilities(summaries, bins=9):
         events = pd.concat([pd.DataFrame(s.events)
                             for s in summaries])
         events = events[events.type == 'WORD']
-        if first:
-            #TODO: make list length configurable
 
-            firstpos = np.full((4, 27), dtype=np.float)
-            for listno in events.list.unique():
-                try:
-                    nonzero = events[(events.list == listno) & (
-                        events.recalled == 1)].serialpos.iloc[0]
-                except IndexError:  # no items recalled this list
-                    continue
+        # max_serialpos = events["serialpos"].max()
+        # step = (max_serialpos + 1) / bins
 
-                thispos = np.zeros(firstpos.shape, firstpos.dtype)
-                thispos[nonzero - 1] = 1
-                firstpos += thispos
-            return (firstpos / events.list.max()).tolist()
-        else:
-            # TODO: make this configurable
-            # NOTE: this includes the practice list
+        events["bin"] = pd.cut(events["serialpos"], bins,
+                               labels=list(range(1, bins+1)))
+        group = events.groupby(['repeats', 'bin']).recalled.mean().reset_index()
+        group = pd.pivot_table(group, values='recalled', columns=['repeats'], index=['bin']).reset_index()
+        group = group.fillna(np.nan).replace([np.nan], [None])
 
-            summary = np.full((4, 27), np.nan)
-            recalls_by_repeat = events[events.type == 'WORD'].groupby(["repeats", "serialpos"]).recalled.mean()
-
-            new_index = pd.MultiIndex.from_product(recalls_by_repeat.index.levels)
-            recalls_by_repeat = recalls_by_repeat.reindex(new_index)
-            recalls_by_repeat = recalls_by_repeat.fillna(np.nan)
-
-            summary[1,:] = recalls_by_repeat[(1,)]
-            summary[2,:] = recalls_by_repeat[(2,)]
-            summary[3,:] = recalls_by_repeat[(3,)]
-
-            summary[0,:] = events[events.type == 'WORD'].groupby(["serialpos"]).recalled.mean().values
-
-            return summary
+        return group
 
 
 class CatFRSessionSummary(FRSessionSummary):
@@ -1370,7 +1350,6 @@ class TICLFRSessionSummary(FRStimSessionSummary):
                 (in_phase & this_position)
             ][has_match]['biomarker_value']
 
-
     @staticmethod
     def pre_stim_prob_recall(summaries, phase=None):
         if phase is None:
@@ -1586,7 +1565,7 @@ class LocationSearchSessionSummary(StimSessionSummary):
     def regressions(self):
         if self._regressions is None:
             self._regressions, _ = tmi.regress_distance(
-                self.pre_psd,self.post_psd,
+                self.pre_psd, self.post_psd,
                 self.connectivity, self.distmat,
                 self.stim_channel_idxs,
                 event_mask=self._bad_events_mask,
@@ -1599,7 +1578,7 @@ class LocationSearchSessionSummary(StimSessionSummary):
 
     @property
     def id(self):
-        return ":".join([self.subject, self.experiment, self.session_number,self.stim_tag])
+        return ":".join([self.subject, self.experiment, self.session_number, self.stim_tag])
 
     @property
     def tmi(self):
