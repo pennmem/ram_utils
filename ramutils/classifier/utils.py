@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 from glob import glob
-from sklearn.linear_model.logistic import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 
 from classiflib.container import ClassifierContainer
 from ramutils.exc import UnableToReloadClassifierException

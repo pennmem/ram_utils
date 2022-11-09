@@ -2,7 +2,8 @@ import functools
 from tempfile import gettempdir
 
 from dask import delayed
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
+import joblib
 
 from ramutils.log import get_logger
 

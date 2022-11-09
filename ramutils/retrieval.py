@@ -927,7 +927,7 @@ def append_fields(old_array, list_of_tuples_field_type):
     if old_array.dtype.fields is None:
         raise ValueError("'old_array' must be a structured numpy array")
 
-    new_dtype = old_array.dtype.descr + list_of_tuples_field_type
+    new_dtype = np.lib.recfunctions.repack_fields(old_array.dtype).descr + list_of_tuples_field_type
 
     # Try to add the new field to the array, should work if it's not already a field
     try:

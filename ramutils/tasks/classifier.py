@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 from classiflib import ClassifierContainer
 from sklearn.metrics import roc_auc_score
-from sklearn.linear_model.logistic import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 
 from ramutils.classifier.cross_validation import permuted_loso_cross_validation, \
     permuted_lolo_cross_validation, perform_cross_validation

@@ -545,11 +545,12 @@ def get_pairs(subject_id, experiment, sessions, paths):
     files = glob(eeg_dir)
 
     # Read HDF5 file to get pairs
+    print(files)
     if len(files) > 0:
         filename = files[0]
 
         with h5py.File(filename, 'r') as hfile:
-            config_str = hfile['/config_files/electrode_config'].value
+            config_str = hfile['/config_files/electrode_config'][()]
 
         # This will create a temporary directory that is removed when the
         # program exists the scope of the 'with' statement
