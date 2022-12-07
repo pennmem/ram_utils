@@ -39,17 +39,17 @@ def subset_events(events, mask):
 
 
 @task()
-def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
+def build_training_data(subject, experiment, paths, sessions=None, file_type='task_events', **kwargs): # TODO: JPB: Change "task_events" to "all_events"
     """ Construct the set of events needed for classifier training """
     if "PAL" in experiment:
         pal_events = load_events(subject, "PAL1", sessions=sessions,
-                                 rootdir=paths.root)
+                                 rootdir=paths.root, file_type=file_type)
         cleaned_pal_events = clean_events(pal_events)
 
     if (("FR" in experiment) and kwargs['combine_events']) or \
             ("PAL" in experiment and kwargs['combine_events']):
         fr_events = load_events(subject, 'FR1', sessions=sessions,
-                                rootdir=paths.root)
+                                rootdir=paths.root, file_type=file_type)
         cleaned_fr_events = clean_events(fr_events,
                                          start_time=kwargs['baseline_removal_start_time'],
                                          end_time=kwargs['retrieval_time'],
@@ -59,7 +59,8 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
 
         catfr_events = load_events(subject, 'catFR1',
                                    sessions=sessions,
-                                   rootdir=paths.root)
+                                   rootdir=paths.root,
+                                   file_type=file_type)
         cleaned_catfr_events = clean_events(catfr_events,
                                             start_time=kwargs['baseline_removal_start_time'],
                                             end_time=kwargs['retrieval_time'],
@@ -72,7 +73,7 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
 
     elif "FR" in experiment and not kwargs['combine_events']:
         free_recall_events = load_events(subject, experiment, sessions=sessions,
-                                         rootdir=paths.root)
+                                         rootdir=paths.root, file_type=file_type)
 
         free_recall_events = clean_events(free_recall_events,
                                           start_time=kwargs['baseline_removal_start_time'],
@@ -83,7 +84,7 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
 
     elif "DBOY1" in experiment and not kwargs['combine_events']:
         free_recall_events = load_events(subject, experiment, sessions=sessions,
-                                         rootdir=paths.root)
+                                         rootdir=paths.root, file_type=file_type)
 
         free_recall_events = clean_events(free_recall_events,
                                           start_time=kwargs['baseline_removal_start_time'],
@@ -122,7 +123,8 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
     if joint_report and 'FR' in experiment:
         fr_events = load_events(subject, 'FR' + series_num,
                                 sessions=sessions,
-                                rootdir=paths.root)
+                                rootdir=paths.root,
+                                file_type=file_type)
         cleaned_fr_events, fr_stim_params = clean_events(
             fr_events, start_time=kwargs['baseline_removal_start_time'],
             end_time=kwargs['retrieval_time'],
@@ -132,7 +134,8 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 
         catfr_events = load_events(subject, 'catFR' + series_num,
                                    sessions=sessions,
-                                   rootdir=paths.root)
+                                   rootdir=paths.root,
+                                   file_type=file_type)
         cleaned_catfr_events, catfr_stim_params = clean_events(
             catfr_events, start_time=kwargs['baseline_removal_start_time'],
             end_time=kwargs['retrieval_time'],
@@ -151,7 +154,7 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 
     elif not joint_report and 'FR' in experiment:
         all_events = load_events(subject, experiment, sessions=sessions,
-                                 rootdir=paths.root)
+                                 rootdir=paths.root, file_type='task_events')
         task_events, stim_params = clean_events(
             all_events, start_time=kwargs['baseline_removal_start_time'],
             end_time=kwargs['retrieval_time'],
@@ -161,7 +164,7 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 
     elif 'DBOY1' in experiment:
         all_events = load_events(subject, experiment, sessions=sessions,
-                                 rootdir=paths.root)
+                                 rootdir=paths.root, file_type=file_type)
         task_events, stim_params = clean_events(
                 all_events, start_time=kwargs['baseline_removal_start_time'],
                 end_time=kwargs['retrieval_time'],

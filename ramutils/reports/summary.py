@@ -431,7 +431,8 @@ class MathSummary(Schema):
 
         """
         n_lists = sum([summary.num_lists for summary in summaries])
-        return MathSummary.total_num_problems(summaries) / n_lists
+        #return MathSummary.total_num_problems(summaries) / n_lists
+        return MathSummary.total_num_problems(summaries) / max(n_lists,1) # TODO: JPB: Remove this
 
 
 class Summary(Schema):
@@ -873,6 +874,7 @@ class CatFRSessionSummary(FRSessionSummary):
     @property
     def subject_ratio(self):
         """ Repetition ratio for the current subject """
+        return 1 # TODO: JPB: Remove this 
         return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 

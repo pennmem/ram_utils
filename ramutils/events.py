@@ -48,7 +48,9 @@ def load_events(subject, experiment, file_type='all_events',
         experiment, and session(s)
 
     """
+    rootdir = "/home1/jbruska/Code/ram_utils/" # TODO: JPB: Remove this
 
+    print(f"load_events({subject}, {experiment}, {file_type}, {sessions}, {rootdir})")
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
@@ -432,12 +434,14 @@ def remove_incomplete_lists(events):
         math_events = sess_events[math_mask]
         final_sess_events = task_events
         final_sess_events.sort(order=['session', 'list', 'eegoffset'])
+        print("math", math_events)
 
         # Remove all task events for lists that don't have a "REC_END" event
         events_by_list = (np.array([l for l in list_group]) for listno,
                           list_group in
                           groupby(final_sess_events, lambda x: x.list))
-        list_has_end = [any([l['type'] in ['REC_END', 'REC_STOP'] for l in list_group]) or
+        list_has_end = [any([l['type'] in ['REC_START'] for l in list_group]) or # TODO: JPB: Remove this
+        #list_has_end = [any([l['type'] in ['REC_END', 'REC_STOP'] for l in list_group]) or
                         listno == -999 for listno, list_group in groupby(
             final_sess_events, lambda x:x.list)]
 
@@ -1742,9 +1746,14 @@ def get_partition_masks(events):
 def get_repetition_ratio_dict(rootdir="/"):
     all_repetition_rates = {}
     all_catfr1_subjects = find_subjects("catFR1", rootdir=rootdir)
-    for subject in all_catfr1_subjects:
+    for i, subject in enumerate(all_catfr1_subjects):
+        #if (subject not in ["R1617S", 'R1640T']):
+        # TODO: JPB: Remove this
+        if (subject not in ["R1642J"]):
+            continue
         events = load_events(subject, "catFR1", file_type='task_events',
                              rootdir=rootdir)
+        print(f"{i+1}/{len(all_catfr1_subjects)} {round(100*(i+1)/len(all_catfr1_subjects), 2):.2f}% {subject}" )
 
         recall_events = events[events.recalled == 1]
         sessions = np.unique(recall_events.session)

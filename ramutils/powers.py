@@ -198,7 +198,7 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
             pow_mat = powers if pow_mat is None else np.concatenate((pow_mat,
                                                                      powers))
 
-    return pow_mat, updated_events
+    return pow_mat, np.lib.recfunctions.repack_fields(updated_events)
 
 
 def compute_normalized_powers(events, **kwargs):
@@ -455,14 +455,12 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
     plt.close()
     return full_path
 
-
-def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
-                              frequencies, hfa_cutoff=65, trigger_freq=110):
+def calculate_delta_hfa(normalized_powers, events, frequencies, hfa_cutoff=65,
+                        trigger_freq=110):
     """
         Calculate tstats and pvalues from a ttest comparing HFA activity of
         recalled versus non-recalled items
     """
-
 
     powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
     hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
@@ -474,11 +472,47 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     recall_mask = get_recall_events_mask(events)
     non_recall_mask = get_non_recall_events_mask(events)
 
-
     print("powers.py")
     print(sum(recall_mask))
     print(sum(non_recall_mask))
 
+    recalled_pow_mat = hfa_powers[recall_mask, :]
+    non_recalled_pow_mat = hfa_powers[non_recall_mask, :]
+
+    tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
+    sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
+
+    pairs_metadata_table = pd.DataFrame(data={
+        'hfa_t_stat': tstats,
+        'hfa_p_value': pvals
+    })
+
+    # Pairs that do not have a label do not need to have the stats displayed
+    #pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
+
+    return pairs_metadata_table
+
+
+def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
+                              frequencies, hfa_cutoff=65, trigger_freq=110):
+    """
+        Calculate tstats and pvalues from a ttest comparing HFA activity of
+        recalled versus non-recalled items
+    """
+
+    powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
+    hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
+    hfa_powers = powers_3d[:, :, hfa_mask]
+
+    # Average powers across frequencies. New shape is n_events x n_electrodes
+    hfa_powers = np.nanmean(hfa_powers, axis=-1)
+
+    recall_mask = get_recall_events_mask(events)
+    non_recall_mask = get_non_recall_events_mask(events)
+
+    print("powers.py")
+    print(sum(recall_mask))
+    print(sum(non_recall_mask))
 
     recalled_pow_mat = hfa_powers[recall_mask, :]
     non_recalled_pow_mat = hfa_powers[non_recall_mask, :]

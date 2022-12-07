@@ -22,7 +22,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
                 trigger_electrode=None, use_classifier_excluded_leads=False,
-                pipeline_name="report"):
+                pipeline_name="report", file_type="all_events"):
     """ Constructs a report and saves out all the necessary data to re-construct the report
 
     This pipeline should be used for generating single session reports for both record-only and
@@ -62,6 +62,9 @@ def make_report(subject, experiment, paths, joint_report=False,
         classifier training
     pipeline_name : str
         Name to use for status updates.
+    file_type: str
+        The name of the event file to load, i.e. all_events, task_events,
+        math_events, ps4_events. Default is 'all_events'
 
     Returns
     -------
@@ -117,6 +120,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                          paths,
                                                          joint_report,
                                                          sessions=sessions,
+                                                         file_type=file_type,
                                                          **kwargs)
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',

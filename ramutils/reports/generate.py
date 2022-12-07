@@ -225,15 +225,15 @@ class ReportGenerator(object):
             # Only non-stim reports have the option of this IRT plot
             if joint:
                 plot_data['category'] = {
-                    'irt_between_cat': np.nanmean(np.concatenate(
+                    'irt_between_cat': float(np.nan_to_num(np.nanmean(np.concatenate(
                         [summary.irt_between_category for summary in
-                         self.catfr_summaries])),
-                    'irt_within_cat': np.nanmean(np.concatenate(
+                         self.catfr_summaries])))),
+                    'irt_within_cat': float(np.nan_to_num(np.nanmean(np.concatenate(
                         [summary.irt_within_category for summary in
-                         self.catfr_summaries])),
-                    'repetition_ratios': self.catfr_summaries[
-                        0].repetition_ratios.tolist(),
-                    'subject_ratio': self.catfr_summaries[0].subject_ratio
+                         self.catfr_summaries])))),
+                    'repetition_ratios': np.nan_to_num(self.catfr_summaries[
+                        0].repetition_ratios.tolist()).tolist(),
+                    'subject_ratio': float(np.nan_to_num(self.catfr_summaries[0].subject_ratio))
                 }
         else:
             plot_data['serialpos'] = {
