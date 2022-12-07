@@ -31,9 +31,9 @@
     </thead>
     <tbody>
       {% for row in sme_table %}
-        {% if row['hfa_p_value'] <= 0.05 and row['hfa_t_stat'] > 0 %}
+        {% if row['hfa_t_stat'] >= 2 %}
         <tr class="sme-positive">
-        {% elif row['hfa_p_value'] <= 0.05 and row['hfa_t_stat'] < 0 %}
+        {% elif row['hfa_t_stat'] < -2 %}
         <tr class="sme-negative">
         {% else %}
         <tr class="sme-no-effect">
