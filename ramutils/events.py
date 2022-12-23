@@ -48,7 +48,7 @@ def load_events(subject, experiment, file_type='all_events',
         experiment, and session(s)
 
     """
-    rootdir = "/home1/jbruska/Code/ram_utils/" # TODO: JPB: Remove this
+    #rootdir = "/home1/jbruska/Code/ram_utils/" # TODO: JPB: Remove this
 
     print(f"load_events({subject}, {experiment}, {file_type}, {sessions}, {rootdir})")
     json_reader = JsonIndexReader(os.path.join(rootdir,

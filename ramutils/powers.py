@@ -232,6 +232,7 @@ def compute_normalized_powers(events, **kwargs):
             start_time = kwargs['retrieval_start_time']
             end_time = kwargs['retrieval_end_time']
             buffer_time = kwargs['retrieval_buf']
+            continue # TODO: JPB: Remove this
 
         elif subset_name == 'pal_encoding':
             start_time = kwargs['pal_start_time']
@@ -463,7 +464,7 @@ def calculate_delta_hfa(normalized_powers, events, frequencies, hfa_cutoff=65,
     """
 
     powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
-    hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
+    hfa_mask = [freq > hfa_cutoff for freq in frequencies]
     hfa_powers = powers_3d[:, :, hfa_mask]
 
     # Average powers across frequencies. New shape is n_events x n_electrodes
@@ -501,7 +502,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     """
 
     powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
-    hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
+    hfa_mask = [freq > hfa_cutoff for freq in frequencies]
     hfa_powers = powers_3d[:, :, hfa_mask]
 
     # Average powers across frequencies. New shape is n_events x n_electrodes
@@ -525,8 +526,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
 
     # Repeat for 110hz. Actual frequency is a decimal, so convert to int when
     #  checking for equality
-    trigger_freq_mask = [True if int(freq) == trigger_freq else False for
-                         freq in frequencies]
+    trigger_freq_mask = [int(freq) == trigger_freq for freq in frequencies]
     single_freq_powers = powers_3d[:, :, trigger_freq_mask]
     single_freq_powers = np.nanmean(single_freq_powers, axis=-1)
 
@@ -538,6 +538,39 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
     pairs_metadata_table['110_t_stat'] = tstats
     pairs_metadata_table['110_p_value'] = pvals
+
+    # Pairs that do not have a label do not need to have the stats displayed
+    pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
+
+    return pairs_metadata_table
+
+def calculate_delta_tag_table(pairs_metadata_table, normalized_powers, events,
+                              frequencies, freq_ranges):
+    """
+        Calculate tstats and pvalues from a ttest comparing HFA activity of
+        recalled versus non-recalled items
+    """
+
+    powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
+    recall_mask = get_recall_events_mask(events)
+    non_recall_mask = get_non_recall_events_mask(events)
+
+    # Calculate SME for each frequency band
+    for band_name, band_freqs in freq_ranges.items():
+        band_mask = [freq in band_freqs for freq in frequencies]
+        band_powers = powers_3d[:, :, band_mask]
+
+        # Average powers across frequencies. New shape is n_events x n_electrodes
+        band_powers = np.nanmean(band_powers, axis=-1)
+
+        recalled_pow_mat = band_powers[recall_mask, :]
+        non_recalled_pow_mat = band_powers[non_recall_mask, :]
+
+        tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
+        sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
+
+        pairs_metadata_table[band_name+'_t_stat'] = tstats
+        pairs_metadata_table[band_name+'_p_value'] = pvals
 
     # Pairs that do not have a label do not need to have the stats displayed
     pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])

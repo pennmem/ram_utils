@@ -112,7 +112,7 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
     )
     return container
 
-
+import time
 @task()
 def summarize_classifier(classifier, pow_mat, events, n_permutations,
                          tag='classifier', **kwargs):
@@ -145,6 +145,8 @@ def summarize_classifier(classifier, pow_mat, events, n_permutations,
     # otherwise leave-one-list-out
     subject, experiment, sessions = extract_event_metadata(events)
 
+    print("n_permutations", n_permutations)
+    t1 = time.time()
     permuted_auc_values, probs = perform_cross_validation(classifier,
                                                           events,
                                                           n_permutations,
@@ -152,6 +154,7 @@ def summarize_classifier(classifier, pow_mat, events, n_permutations,
                                                           recalls,
                                                           sessions,
                                                           **kwargs)
+    print("cross_validation", time.time() - t1)
 
     classifier_summary = ClassifierSummary()
 
