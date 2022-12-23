@@ -1749,8 +1749,8 @@ def get_repetition_ratio_dict(rootdir="/"):
     for i, subject in enumerate(all_catfr1_subjects):
         #if (subject not in ["R1617S", 'R1640T']):
         # TODO: JPB: Remove this
-        if (subject not in ["R1642J"]):
-            continue
+        #if (subject not in ["R1642J"]):
+        #    continue
         events = load_events(subject, "catFR1", file_type='task_events',
                              rootdir=rootdir)
         print(f"{i+1}/{len(all_catfr1_subjects)} {round(100*(i+1)/len(all_catfr1_subjects), 2):.2f}% {subject}" )
