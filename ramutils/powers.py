@@ -232,7 +232,6 @@ def compute_normalized_powers(events, **kwargs):
             start_time = kwargs['retrieval_start_time']
             end_time = kwargs['retrieval_end_time']
             buffer_time = kwargs['retrieval_buf']
-            continue # TODO: JPB: Remove this
 
         elif subset_name == 'pal_encoding':
             start_time = kwargs['pal_start_time']
