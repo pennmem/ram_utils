@@ -25,7 +25,8 @@ EXPERIMENTS = {
     ],
     'open_loop': [
         'FR2',
-        'CatFR2'
+        'CatFR2',
+        'RepFR2'
     ],
     'closed_loop': [
         'FR3',

@@ -133,20 +133,20 @@ def make_report(subject, experiment, paths, joint_report=False,
 
 
     # TODO: turn into dictionary lookup
-    if 'RepFR' in experiment:
-        # TODO: don't need to use these parameters
-        data = generate_data_for_repfr_report(subject, experiment, sessions, 
-                                                joint_report, paths, ec_pairs,
-                                                used_pair_mask, excluded_pairs,
-                                                final_pairs, pairs_metadata_table,
-                                                all_events, **kwargs)
-        
-        report = build_static_report(subject, experiment, data.session_summaries,
-                                     None, data.target_selection_table,
-                                     data.classifier_evaluation_results,
-                                     dest=paths.dest)
-
-        return report
+#    if 'RepFR' in experiment:
+#        # TODO: don't need to use these parameters
+#        data = generate_data_for_repfr_report(subject, experiment, sessions, 
+#                                                joint_report, paths, ec_pairs,
+#                                                used_pair_mask, excluded_pairs,
+#                                                final_pairs, pairs_metadata_table,
+#                                                all_events, **kwargs)
+#        
+#        report = build_static_report(subject, experiment, data.session_summaries,
+#                                     None, data.target_selection_table,
+#                                     data.classifier_evaluation_results,
+#                                     dest=paths.dest)
+#
+#        return report
 
     if 'DBOY' in experiment:
         data = generate_data_for_dboy_report(subject, experiment, sessions,
