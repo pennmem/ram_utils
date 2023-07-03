@@ -17,7 +17,7 @@ class RamArgumentParser(ArgumentParser):
 
         self.add_argument('--root', default='/',
                           help='path to rhino root (default: /)')
-        self.add_argument('--dest', '-d', default='scratch/ramutils',
+        self.add_argument('--dest', '-d', default='data10/RAM/report_database/',
                           help='directory to write output to relative to ROOT \n (default: scratch/ramutils)')
         self.add_argument('--cachedir', default=default_cache_dir,
                           help='absolute path for caching dir')
