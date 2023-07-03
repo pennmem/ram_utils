@@ -10,6 +10,7 @@ EXPERIMENTS = {
     'record_only': [
         'FR1',
         'CatFR1',
+        'ICatFR1',
         'PAL1',
         'DBOY1',
         'RepFR1'
@@ -26,17 +27,21 @@ EXPERIMENTS = {
     'open_loop': [
         'FR2',
         'CatFR2',
+        'ICatFR2',
         'RepFR2'
     ],
     'closed_loop': [
         'FR3',
         'CatFR3',
+        'ICatFR3',
         'PAL3',
         'FR5',
         'CatFR5',
+        'ICatFR5',
         'PAL5',
         'FR6',
         'CatFR6',
+        'ICatFR6',
         'TICL_FR',
         'TICL_CatFR',
     ],
@@ -49,6 +54,7 @@ EXPERIMENTS = {
         'PS4_CatFR5',
         'FR6',
         'CatFR6',
+        'ICatFR6',
     ]
 }
 
