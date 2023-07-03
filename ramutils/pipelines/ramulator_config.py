@@ -163,9 +163,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
                            "implemented")
     kwargs = exp_params.to_dict()
+    #import pdb; pdb.set_trace()
 
     all_task_events = build_training_data(
-        subject, experiment, paths, sessions=sessions, **kwargs)
+        subject, experiment, paths, sessions, **kwargs)
 
     powers, final_task_events = compute_normalized_powers(all_task_events,
                                                           bipolar_pairs=ec_pairs,

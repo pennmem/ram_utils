@@ -28,6 +28,8 @@ parser.add_argument('--localization', '-l', default=0, type=int,
                     help='localization number (default: 0)')
 parser.add_argument('--montage', '-m', default=0, type=int,
                     help='montage number (default: 0)')
+#parser.add_argument('--sessions', '-S', default=0, nargs="*", type=int,
+#                    help='montage number (default: 0)')
 parser.add_argument('--electrode-config-file', '-e', type=str,
                     help='path to existing electrode config CSV file')
 parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
