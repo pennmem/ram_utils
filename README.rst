@@ -19,10 +19,10 @@ Bootstrapping a conda environment
     source activate environment_name
     conda install -c pennmem ramutils
 
-Usage with the RAM_clinical account
+Usage with the RAM_maint account
 -----------------------------------
 
-For generating Ramulator configuration files, the ``RAM_clinical`` account on
+For generating Ramulator configuration files, the ``RAM_maint`` account on
 ``rhino2`` should be used. This account provides a managed conda environment
 and should only be updated by a responsible person from the Systems Development
 team.
@@ -30,7 +30,7 @@ team.
 The general workflow for users is the following:
 
 1. Login to rhino using your normal account
-2. Use ``sudo`` to open a shell with the ``RAM_clinical`` user: ``sudo -s -u RAM_clinical``
+2. Use ``sudo`` to open a shell with the ``RAM_maint`` user: ``sudo -s -u RAM_maint``
 3. Use ``qlogin`` to open an interactive session on an availabel node: ``qlogin``
 4. Activate the ``ramutils`` environment: ``source activate ramutils``
 5. Run the provided command line scripts
