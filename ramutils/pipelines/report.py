@@ -4,7 +4,7 @@ from collections import namedtuple
 import pandas as pd
 
 # TODO: import experiments file
-from ramutils.pipelines.experiments import generate_data_for_repfr_report, generate_data_for_dboy_report, ReportData
+from ramutils.pipelines.experiments import generate_data_for_repfr_report, generate_data_for_dboy_report, generate_data_for_efrcourier_report, ReportData
 from ramutils.events import dataframe_to_recarray
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
@@ -13,7 +13,8 @@ from .hooks import PipelineCallback
 
 experiment_mapping = {
             'RepFR': generate_data_for_repfr_report, 
-            'DBOY': generate_data_for_dboy_report,
+            'DBOY': generate_data_for_dboy_report, 
+            'EFRCourier': generate_data_for_efrcourier_report,
             # TODO: ps4, other experiments
         }
 
@@ -154,6 +155,21 @@ def make_report(subject, experiment, paths, joint_report=False,
                                              used_pair_mask, excluded_pairs,
                                              final_pairs, pairs_metadata_table,
                                              all_events, **kwargs)
+
+        report = build_static_report(subject, experiment, data.session_summaries,
+                                     None, data.target_selection_table,
+                                     data.classifier_evaluation_results,
+                                     dest=paths.dest)
+
+        return report
+    
+    # WIP (CRB)
+    if 'EFRCourier' in experiment:
+        data = generate_data_for_efrcourier_report(subject, experiment, sessions,
+                                                     joint_report, paths, ec_pairs,
+                                                     used_pair_mask, excluded_pairs,
+                                                     final_pairs, pairs_metadata_table,
+                                                     all_events, **kwargs)
 
         report = build_static_report(subject, experiment, data.session_summaries,
                                      None, data.target_selection_table,

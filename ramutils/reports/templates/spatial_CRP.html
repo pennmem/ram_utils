@@ -1,0 +1,12 @@
+<div class="plot spatial-crp">
+  <h2>Spatial CRP</h2>
+  <figure>
+    <div id="spatial-crp-placeholder"></div>
+    <script>
+      window.addEventListener('load', () => {
+        let crp_data = JSON.parse('{{ crp_data["spatial"] }}');
+        ramutils.plots.plotLagCRP(crp_data.sem_bin, crp_data.prob);
+      });
+    </script>
+  </figure>
+</div>

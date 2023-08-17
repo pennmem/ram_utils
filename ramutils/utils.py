@@ -231,6 +231,11 @@ def is_stim_experiment(experiment):
         return True
     elif 'TICL' in experiment:
         return True
+    elif 'EFRCourier' in experiment:
+        if 'ReadOnly' in experiment:
+            return False
+        else:
+            return True
     elif experiment_series != '1':
         return True
 

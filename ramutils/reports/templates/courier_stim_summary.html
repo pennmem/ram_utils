@@ -1,0 +1,61 @@
+<div class="plot stim-params">
+  <h2>Stimulation Parameter Summary</h2>
+  <table id="stim_summary" class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>Delivery Day</th>
+      <th>Burst Frequency [Hz]</th>
+      <th>Number of encoding stim</th>
+      <th>Number of retrieval stim</th>
+      <th>Anode</th>
+      <th>Cathode</th>
+      <th>Region</th>
+      <th>Amplitude [mA]</th>
+      <th>Duration [ms]</th>
+      <th>Pulse Frequency [Hz]</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for stim_param in stim_params %}
+    {% if experiment == "location_search" %}
+    {% if stim_param['TMI'] > 2 %}
+    <tr class="sme-positive">
+    {% elif stim_param['TMI'] < -2 %}
+    <tr class="sme-negative">
+    {% else %}
+    <tr>
+    {% endif %}
+    {% else %}
+    <tr>
+    {% endif %}
+        <td>{{ stim_param['trial'] }}</td>
+        <td>{{ stim_param['burst_freq'] }}</td>
+        <td>{{ stim_param['n_enc_stim'] }}</td>
+        <td>{{ stim_param['n_rec_stim'] }}</td>
+        <td>{{ stim_param['anode_label'] }}</td>
+        <td>{{ stim_param['cathode_label'] }}</td>
+        <td>{{ stim_param['location'] }}</td>
+        <td>{{ stim_param['amplitude'] }}</td>
+        <td>{{ stim_param['stim_duration'] }}</td>
+        <td>{{ stim_param['pulse_freq'] }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+    <script>
+      (function () {
+    document.querySelectorAll('tr.sme-positive').forEach((el) => {
+      el.title = 'Significant positive effect';
+    });
+    document.querySelectorAll('tr.sme-negative').forEach((el) => {
+      el.title = 'Significant negative effect';
+    });
+    document.querySelectorAll('tr.sme-no-effect').forEach((el) => {
+      el.title = 'No significant effect';
+    });
+  })();
+    window.addEventListener('load', () => {
+      $('#stim_summary').DataTable();
+    });
+  </script>
+</div>

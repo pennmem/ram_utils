@@ -6,17 +6,23 @@ from datetime import datetime
 import json
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+import cmlreaders as cml
 import pytz
 import pickle
 import base64
 from collections import OrderedDict
 import io
+import os
 
 from ramutils.utils import safe_divide
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
+from ramutils.crps import lag_CRP, spatial_CRP
 from ramutils.exc import TooManySessionsError
+from ramutils.navigation import make_navigation_plot, make_navtime_plot
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot, save_eeg_by_channel_plot
 from ramutils.utils import encode_file
@@ -40,6 +46,8 @@ __all__ = [
     'repFRSessionSummary',
     'CatFRSessionSummary',
     'FRStimSessionSummary',
+    'EFRCourierSessionSummary',
+    'EFRCourierStimSessionSummary',
     'FR5SessionSummary',
     'TICLFRSessionSummary',
     'PSSessionSummary',
@@ -590,6 +598,15 @@ class SessionSummary(Summary):
         save_power_plot(self.normalized_powers,
                         self.session_number, plot_buffer)
         return encode_file(plot_buffer)
+    
+#     @property
+#     def navigation_trajectory_plot(self):
+#         """
+        
+#         """
+#         plot_buffer = io.BytesIO()
+#         make_navigation_plot(self.session_number, plot_buffer)
+#         return encode_file(plot_buffer)
 
     @property
     def session_length(self):
@@ -1019,7 +1036,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         combined_df = pd.concat(all_summary_dfs)
         return combined_df
-
+    
     @staticmethod
     def all_post_stim_prob_recall(summaries, phase=None):
         post_stim_prob_recall = [
@@ -1257,6 +1274,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     def prob_recall_by_serialpos(summaries, stim_items_only=False):
         """ Probability of recall by serial position. Optionally returns results for only stim items """
         df = FRStimSessionSummary.combine_sessions(summaries)
+        
         group = df[df.is_stim_item == stim_items_only].groupby('serialpos')
         return group.recalled.mean().tolist()
 
@@ -1279,7 +1297,533 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             ((recall_stim - nonstim_low_bio_recall) / df.recalled.mean())
 
         return delta_recall
+    
+class EFRCourierSessionSummary(SessionSummary):
+    """EFR Courier session summary data."""
 
+
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, raw_events=None):
+        """Populate data from events.
+
+        Parameters
+        ----------
+        events : np.recarray
+        raw_events: np.recarray
+        recall_probs : np.ndarray
+            Predicted probabilities of recall per item. If not given, assumed
+            there is no relevant classifier and values of -999 are used to
+            indicate this.
+
+        """
+        SessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
+                                normalized_powers, raw_events=raw_events)
+
+    @property
+    def intrusion_events(self):
+        """ Recall events that were either extra-list or prior-list intrusions """
+        intr_events = self.raw_events[(self.raw_events.type == 'REC_WORD') &
+                                      (self.raw_events.intrusion != -999) &
+                                      (self.raw_events.intrusion != 0)]
+        return intr_events
+
+    @property
+    def num_words(self):
+        """ Number of words in the session """
+        return len(self.events[self.events.type == 'WORD'])
+
+    @property
+    def num_correct(self):
+        """ Number of correctly-recalled words """
+        return np.sum(self.events[self.events.type == 'WORD'].recalled)
+
+    @property
+    def num_prior_list_intrusions(self):
+        """ Calculates the number of prior list intrusions """
+
+        return np.sum((self.intrusion_events.intrusion > 0))
+
+    @property
+    def num_extra_list_intrusions(self):
+        """ Calculates the number of extra-list intrusions """
+        return np.sum((self.intrusion_events.intrusion == -1))
+
+    @property
+    def num_lists(self):
+        """Returns the total number of lists."""
+        return len(np.unique(self.events.list))
+
+    @property
+    def percent_recalled(self):
+        """Calculates the percentage correctly recalled words."""
+        return 100 * self.num_correct / self.num_words
+
+    @staticmethod
+    def serialpos_probabilities(summaries, first=False):
+        """Computes the mean recall probability by word serial position.
+
+        Parameters
+        ----------
+        summaries : List[Summary]
+            Summaries of sessions.
+        first : bool
+            When True, return probabilities that each serial position is the
+            first recalled word. Otherwise, return the probability of recall
+            for each word by serial position.
+
+        Returns
+        -------
+        List[float]
+
+        """
+        columns = ['serialpos', 'list', 'recalled', 'type']
+        events = pd.concat([pd.DataFrame(s.events[columns])
+                            for s in summaries])
+        events = events[events.type == 'WORD']
+
+        if first:
+            firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+            for listno in events.list.unique():
+                try:
+                    nonzero = events[(events.list == listno) & (
+                        events.recalled == 1)].serialpos.iloc[0]
+                except IndexError:  # no items recalled this list
+                    continue
+                thispos = np.zeros(firstpos.shape, firstpos.dtype)
+                thispos[nonzero - 1] = 1
+                firstpos += thispos
+            return (firstpos / events.list.max()).tolist()
+        else:
+            group = events.groupby('serialpos')
+            return group.recalled.mean().tolist()    
+
+
+class EFRCourierStimSessionSummary(FRSessionSummary, StimSessionSummary):
+    """ SessionSummary for EFR Courier sessions with stim """
+
+    def populate(self, events, bipolar_pairs,
+                 excluded_pairs, normalized_powers, post_stim_prob_recall=None,
+                 raw_events=None, model_metadata={}, post_stim_eeg=None,
+                 stim_tstats=None):
+        EFRCourierSessionSummary.populate(self,
+                                  events,
+                                  bipolar_pairs,
+                                  excluded_pairs,
+                                  normalized_powers,
+                                  raw_events=raw_events)
+        StimSessionSummary.populate(self, events,
+                                    bipolar_pairs,
+                                    excluded_pairs,
+                                    normalized_powers,
+                                    post_stim_prob_recall=post_stim_prob_recall,
+                                    raw_events=raw_events,
+                                    model_metadata=model_metadata,
+                                    post_stim_eeg=post_stim_eeg,
+                                    stim_tstats=stim_tstats)
+
+    @staticmethod
+    def combine_sessions(summaries, experiment='EFRCourierOpenLoop'):
+        """ Combine information from multiple stim sessions """
+        all_summary_dfs = []
+        for summary in summaries:
+            df = summary.to_dataframe()
+            all_summary_dfs.append(df)
+
+        combined_df = pd.concat(all_summary_dfs)
+        
+        subj = combined_df.subject.unique()[0]
+        
+        isFirst = True
+        for sess in combined_df.session.unique():
+        
+            reader = cml.CMLReader(subject=subj,
+                                       session=sess,
+                                       experiment=experiment)
+
+            evs = reader.load('events')
+
+            evs = EFRCourierStimSessionSummary.fix_evs(evs)
+            
+            if isFirst:
+                combined = evs
+                isFirst = False
+            else:
+                combined = pd.concat([combined, evs])
+        
+        return combined
+    
+    @staticmethod
+    def all_post_stim_prob_recall(summaries, phase=None):
+        post_stim_prob_recall = [
+            summary.post_stim_prob_recall for summary in summaries]
+        post_stim_prob_recall = np.concatenate(post_stim_prob_recall).tolist()
+        return post_stim_prob_recall
+
+    @staticmethod
+    def pre_stim_prob_recall(summaries, phase=None):
+        """ Classifier output in the pre-stim period for items that were eventually stimulated """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        pre_stim_probs = df[df['is_stim_item'] ==
+                            True].classifier_output.values.tolist()
+        return pre_stim_probs
+
+    @staticmethod
+    def num_nonstim_lists(summaries):
+        """Returns the number of non-stim lists."""
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        count = 0
+        for listno in df.list.unique():
+            if not df[df.list == listno].is_stim_list.all():
+                count += 1
+        return count
+
+    @staticmethod
+    def num_stim_lists(summaries):
+        """Returns the number of stim lists."""
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        count = 0
+        for listno in df.list.unique():
+            if df[df.list == listno].is_stim_list.all():
+                count += 1
+        return count
+
+    @staticmethod
+    def stim_events_by_list(summaries):
+        """ Array containing the number of stim events by list """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        n_stim_events = df.groupby('list').is_stim_item.sum().tolist()
+        return n_stim_events
+
+    @staticmethod
+    def prob_stim_by_serialpos(summaries):
+        """ Array containing the probability of stimulation (mean of the classifier output) by serial position """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        evs = df[df.type == 'WORD']
+        return evs.groupby('serialpos').is_stim_item.mean().tolist()
+
+    @staticmethod
+    def lists(summaries, stim=None):
+        """ Get a list of either stim lists or non-stim lists """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        if stim is not None:
+            lists = df[df.is_stim_list == stim].list.unique().tolist()
+        else:
+            lists = df.list.unique().tolist()
+        return lists
+
+    @property
+    def stim_columns(self):
+        """ Fields associated with stimulation parameters """
+        return ['anode_label', 'cathode_label', 'burst_freq', 'amplitude',
+                'stim_duration', 'pulse_freq']
+
+    @staticmethod
+    def stim_params_by_list(summaries):
+        """ Returns a dataframe of stimulation parameters used within each session/list """
+        evs = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        evs = evs.replace('nan', np.nan)
+        
+        subj = evs.subject.unique()[0]
+        sess = evs.session.unique()[0]
+        
+        reader = cml.CMLReader(subject=subj,
+                                   session=sess,
+                                   experiment='EFRCourierOpenLoop')
+        
+        channels = reader.load("pairs")
+        
+        stim_columns = ['anode_label', 'cathode_label', 'burst_freq',
+                        'amplitude', 'stim_duration', 'pulse_freq']
+        non_stim_columns = [c for c in evs.columns if c not in stim_columns]
+        static_columns = [c for c in ['subject', 'experiment', 'session', 'trial']
+                          if c in evs.columns]
+
+        stim_param_by_list = pd.concat([evs.drop(['stim_params'], axis=1),evs.stim_params.apply(pd.Series)[stim_columns]], axis=1)
+        
+        caths = stim_param_by_list.cathode_label
+        ans = stim_param_by_list.anode_label
+        cath = caths[caths != ''].unique()[0]
+        an = ans[ans != ''].unique()[0]
+        label = cath+'-'+an
+        location = channels[channels.label == label]['mni.region'].values[0]
+        stim_param_by_list['location'] = [location if c != '' else '' for c in caths]
+        
+#         stim_param_by_list = (df[(stim_columns + static_columns)]
+#                               .drop_duplicates()
+#                               .dropna(how='all'))
+
+        # This ensures that for any given list, the stim parameters used
+        # during that list are populated. This makes calculating post stim
+        # item behavioral responses easier
+#         evs = evs[non_stim_columns]
+#         evs = evs.merge(stim_param_by_list, on=['subject', 'experiment',
+#                                               'session', 'trial'], how='left')
+        
+        
+        return stim_param_by_list
+
+    @staticmethod
+    def stim_parameters(summaries):
+        """ Returns a list of unique stimulation parameters used during the experiment """
+        df = EFRCourierStimSessionSummary.stim_params_by_list(summaries)
+        return EFRCourierStimSessionSummary.aggregate_stim_params_over_list(df)
+
+    @staticmethod
+    def aggregate_stim_params_over_list(df):
+#         df['location'] = df['location'].replace(np.nan, '--')
+#         stim_columns = ['anode_label', 'cathode_label', 'location',
+#                         'amplitude', 'burst_freq',
+#                         'stim_duration', 'pulse_freq']
+#         grouped = (df.groupby(by=stim_columns)
+#                    .agg({'is_stim_item': 'sum',
+#                          'subject': 'count'})
+#                    .rename(columns={'is_stim_item': 'n_stimulations',
+#                                     'subject': 'n_trials'})
+#                    .reset_index())
+        
+        
+        cols = ['trial', 'burst_freq', 'anode_label', 'cathode_label', 'location', 'amplitude', 'stim_duration', 'pulse_freq']
+
+        trials = [dd for dd in df.trial.unique() if dd != -999]
+
+        for dd in trials:
+            dd_data = df[(df.trial == dd) & ((df.phase == 'encoding') | (df.phase == 'retrieval'))]
+            stim_data = dd_data[dd_data.type == 'STIM']
+
+            dd_params = stim_data[cols].groupby(cols).mean()
+            dd_params['n_enc_stim'] = len(stim_data[stim_data.phase == 'encoding'])
+            dd_params['n_rec_stim'] = len(stim_data[stim_data.phase == 'retrieval'])
+
+            if dd == 0:
+                stim_params = dd_params
+            else:
+                stim_params = pd.concat([stim_params,dd_params])
+
+
+        stim_params = stim_params.reset_index()
+        return list(stim_params.T.to_dict().values())
+
+    @staticmethod
+    def recall_test_results(summaries, experiment):
+        """
+            Returns a dictionary containing the results of chi-squared tests for the behavioral effects of stimulation.
+            Comparisons include stim lists vs. non-stim lists, stim items vs. low-biomarker non-stim items, and post-stim
+            items vers. low-biomarker non-stim items. All comparisons are done for each unique set of stimulation parameters
+        """
+        df = EFRCourierStimSessionSummary.stim_params_by_list(summaries)
+
+        if "PS5" not in experiment:
+            df = df[df.list > 3]
+        else:
+            df = df[df.list > -1]
+
+        results = []
+        for name, group in df.groupby(['stimAnodeTag', 'stimCathodeTag',
+                                       'amplitude', 'stim_duration',
+                                       'pulse_freq']):
+            parameters = "/".join([str(n) for n in name])
+
+            # Stim lists vs. non-stim lists
+            n_correct_stim_list_recalls = group[group.is_stim_list == True].recalled.sum(
+            )
+            n_correct_nonstim_list_recalls = df[df.is_stim_list == False].recalled.sum(
+            )
+            n_stim_list_words = group[group.is_stim_list ==
+                                      True].recalled.count()
+            n_nonstim_list_words = df[df.is_stim_list ==
+                                      False].recalled.count()
+            tstat_list, pval_list, _ = proportions_chisquare([
+                n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
+                [n_stim_list_words, n_nonstim_list_words])
+
+            results.append({"parameters": parameters,
+                            "comparison": "Stim Lists vs. Non-stim Lists",
+                            "stim": (n_correct_stim_list_recalls,
+                                     n_stim_list_words),
+                            "non-stim": (n_correct_nonstim_list_recalls, n_nonstim_list_words),
+                            "t-stat": tstat_list,
+                            "p-value": pval_list})
+
+            # stim items vs. non-stim low biomarker items
+            n_correct_stim_item_recalls = group[group.is_stim_item == True].recalled.sum(
+            )
+            n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
+                                                (df.classifier_output <
+                                                 df.thresh)].recalled.sum()
+
+            n_stim_items = group[group.is_stim_item == True].recalled.count()
+            n_nonstim_items = df[(df.is_stim_item == False) &
+                                 (df.classifier_output <
+                                  df.thresh)].recalled.count()
+
+            tstat_list, pval_list, _ = proportions_chisquare(
+                [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
+                [n_stim_items, n_nonstim_items])
+
+            results.append({
+                "parameters": parameters,
+                "comparison": "Stim Items vs. Low Biomarker Non-stim Items",
+                "stim": (n_correct_stim_item_recalls, n_stim_items),
+                "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "t-stat": tstat_list,
+                "p-value": pval_list})
+
+            # post stim items vs. non-stim low biomarker items
+            n_correct_post_stim_item_recalls = group[group.is_post_stim_item == True].recalled.sum(
+            )
+            n_post_stim_items = group[group.is_post_stim_item ==
+                                      True].recalled.count()
+
+            tstat_list, pval_list, _ = proportions_chisquare(
+                [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
+                [n_post_stim_items, n_nonstim_items])
+
+            results.append({
+                "parameters": parameters,
+                "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
+                "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
+                "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "t-stat": tstat_list,
+                "p-value": pval_list})
+
+        return results
+
+    @staticmethod
+    def recalls_by_list(summaries, stim_list_only=False):
+        """ Number of recalls by list. Optionally returns results for only stim lists """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        if stim_list_only:
+            recalls_by_list = (
+                df[df.is_stim_list == stim_list_only]
+                .groupby('trial')
+                .recalled
+                .sum()
+                .astype(int)
+                .tolist())
+        else:
+            recalls_by_list = (
+                df.groupby('trial')
+                  .recalled
+                  .sum()
+                  .astype(int)
+                  .tolist())
+
+        return recalls_by_list
+
+    @staticmethod
+    def prob_first_recall_by_serialpos(summaries, stim=False):
+        """ Probability of recalling a word first by serial position. Optionally returns results for only stim items """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        events = df[df.is_stim_item == stim]
+
+        firstpos = np.zeros(
+            ExperimentParameters().number_of_items, dtype=np.float)
+        for listno in events.trial.unique():
+            try:
+                nonzero = events[(events.trial == listno) &
+                                 (events.recalled == 1)].serialpos.iloc[0]
+            except IndexError:  # no items recalled this list
+                continue
+            thispos = np.zeros(firstpos.shape, firstpos.dtype)
+            thispos[nonzero - 1] = 1
+            firstpos += thispos
+        return (firstpos / events.trial.max()).tolist()
+
+    @staticmethod
+    def prob_recall_by_serialpos(summaries, stim_items_only=False):
+        """ Probability of recall by serial position. Optionally returns results for only stim items """
+        evs = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        
+        group = evs[evs.is_stim_item == stim_items_only].groupby('serialpos')
+        return group.recalled.mean().tolist()
+
+    @staticmethod
+    def delta_recall(summaries, post_stim_items=False):
+        """
+            %change in item recall for stimulated items versus non-stimulated low biomarker items. Optionally return
+            the same comparison, but for post-stim items
+        """
+        df = EFRCourierStimSessionSummary.combine_sessions(summaries)
+        nonstim_low_bio_recall = df[(df.classifier_output < df.thresh) &
+                                    (df.is_stim_list == False)].recalled.mean()
+        if post_stim_items:
+            recall_stim = df[df.is_post_stim_item == True].recalled.mean()
+
+        else:
+            recall_stim = df[df.is_stim_item == True].recalled.mean()
+
+        delta_recall = 100 * \
+            ((recall_stim - nonstim_low_bio_recall) / df.recalled.mean())
+
+        return delta_recall
+    
+    @staticmethod
+    def fix_evs(evs):
+        state = 'encoding'
+        is_stim = False
+        evs['is_stim_item'] = ''
+        for index, row in evs.iterrows():
+
+            if row.type == 'WORD':
+                evs.at[index, 'is_stim_item'] = is_stim
+
+            if is_stim:
+                is_stim = False
+
+            if row.type == 'TRIAL_START':
+                state = 'encoding'
+
+            if row.type == 'FSR_START':
+                state = 'FSR'
+
+            if row.type == 'FFR_START':
+                state = 'FSR'
+
+            evs.at[index, 'phase'] = state
+
+            if row.type == 'TRIAL_END':
+                state = 'retrieval'
+
+            if row.type == 'STIM' and state == 'encoding':
+                is_stim = True
+
+        return evs
+    
+    @staticmethod
+    def get_navplot_data(summaries, experiment):
+        
+        evs = EFRCourierStimSessionSummary.combine_sessions(summaries, experiment)
+        
+        plots = make_navigation_plot(evs, experiment)
+        
+        return plots
+    
+    @staticmethod
+    def get_navtime_plot(summaries, experiment):
+        
+        evs = EFRCourierStimSessionSummary.combine_sessions(summaries, experiment)
+        
+        plot = make_navtime_plot(evs)
+        
+        return plot
+    
+    @staticmethod
+    def get_lag_CRP(summaries, experiment):
+        
+        evs = EFRCourierStimSessionSummary.combine_sessions(summaries, experiment)
+        
+        lag_crp = lag_CRP(evs)
+        
+        return lag_crp
+    
+    @staticmethod
+    def get_spatial_CRP(summaries, experiment):
+        
+        evs = EFRCourierStimSessionSummary.combine_sessions(summaries, experiment)
+        
+        spatial_crp = spatial_CRP(evs)
+        
+        return spatial_crp
 
 
 class FR5SessionSummary(FRStimSessionSummary):

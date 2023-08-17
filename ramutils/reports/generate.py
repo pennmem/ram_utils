@@ -14,7 +14,8 @@ from pkg_resources import resource_listdir, resource_string
 from ramutils import __version__
 from ramutils.reports.summary import (FRSessionSummary, MathSummary,
                                       FRStimSessionSummary, TICLFRSessionSummary,
-                                      LocationSearchSessionSummary, repFRSessionSummary)
+                                      LocationSearchSessionSummary, repFRSessionSummary,
+                                      EFRCourierSessionSummary, EFRCourierStimSessionSummary)
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
 
@@ -66,7 +67,11 @@ class ReportGenerator(object):
     Supported reports:
 
     * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4, PS5, FR6, catFR6,
-      TICL_FR, LocationSearch
+      TICL_FR, LocationSearch, DBOY1
+      
+    Reports currently in development:
+    
+    * EFRCourierOpenLoop, EFRCourierReadOnly
 
     """
 
@@ -148,7 +153,7 @@ class ReportGenerator(object):
                               if summary.normalized_powers is not None]
         }
         return feature_data
-
+    
     def _make_combined_summary(self):
         """ Aggregate behavioral summary data across given sessions """
         return {
@@ -191,6 +196,20 @@ class ReportGenerator(object):
         }
         return classifier_metadata
 
+    def _make_navigation_data(self):
+        navigation_data = {
+            'trajectory': EFRCourierStimSessionSummary.get_navplot_data(self.session_summaries, self.experiment),
+            'time': EFRCourierStimSessionSummary.get_navtime_plot(self.session_summaries, self.experiment)
+        }
+        return navigation_data
+    
+    def _make_crps(self):
+        crp_data = {
+            'lag': EFRCourierStimSessionSummary.get_lag_CRP(self.session_summaries, self.experiment),
+            'spatial': EFRCourierStimSessionSummary.get_spatial_CRP(self.session_summaries, self.experiment)
+        }
+        return crp_data
+    
     def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
         """ Build up a large dictionary of data for various plots from plot-specific components """
 
@@ -235,6 +254,49 @@ class ReportGenerator(object):
                         0].repetition_ratios.tolist()).tolist(),
                     'subject_ratio': float(np.nan_to_num(self.catfr_summaries[0].subject_ratio))
                 }
+        elif "EFRCourier" in self.experiment:
+            plot_data['serialpos'] = {
+                'serialpos': list(range(1, 13)),
+                'overall': {
+                    'Overall (non-stim)': EFRCourierStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
+                                                                                        stim_items_only=False),
+                    'Overall (stim)': EFRCourierStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
+                                                                                    stim_items_only=True)
+                },
+                'first': {
+                    'First recall (non-stim)': EFRCourierStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
+                                                                                                   stim=False),
+                    'First recall (stim)': EFRCourierStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
+                                                                                               stim=True)
+                }
+            }
+#             plot_data['recall_summary'] = {
+#                 'nonstim': {
+#                     'listno': EFRCourierStimSessionSummary.lists(self.session_summaries, stim=False),
+#                     'recalled': EFRCourierStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=False)
+#                 },
+#                 'stim': {
+#                     'listno': EFRCourierStimSessionSummary.lists(self.session_summaries, stim=True),
+#                     'recalled': EFRCourierStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=True)
+#                 },
+#                 'stim_events': {
+#                     'listno': EFRCourierStimSessionSummary.lists(self.session_summaries),
+#                     'count': EFRCourierStimSessionSummary.stim_events_by_list(self.session_summaries)
+#                 }
+#             }
+            plot_data['stim_probability'] = {
+                'serialpos': list(range(1, 13)),
+                'probability': EFRCourierStimSessionSummary.prob_stim_by_serialpos(self.session_summaries)
+            }
+#             plot_data['recall_difference'] = {
+#                 'stim': EFRCourierStimSessionSummary.delta_recall(self.session_summaries),
+#                 'post_stim': EFRCourierStimSessionSummary.delta_recall(self.session_summaries, post_stim_items=True)
+#             }
+            
+#             plot_data['post_stim_plots'] = [summary.post_stim_eeg_plot
+#                                             for summary in self.session_summaries]
+
+
         else:
             plot_data['serialpos'] = {
                 'serialpos': list(range(1, 13)),
@@ -309,6 +371,9 @@ class ReportGenerator(object):
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
             plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
+            
+        
+        
 
         return json.dumps(plot_data)
 
@@ -343,7 +408,13 @@ class ReportGenerator(object):
 
         elif all(['DBOY' in exp for exp in self.experiments]):
             return self.generate_courier_report(joint=joint)
+        
+        elif all(['EFRCourierReadOnly' in exp for exp in self.experiments]):
+            return self.generate_courier_report(joint=joint)
 
+        elif all(['EFRCourierOpenLoop' in exp for exp in self.experiments]):
+            return self.generate_open_loop_courier_report(joint=joint)
+        
         elif series == '1':
             return self.generate_record_only_report(joint=joint)
 
@@ -434,6 +505,25 @@ class ReportGenerator(object):
                 classifiers=self._make_classifier_data(),
                 plot_data=self._make_plot_data(stim=False, classifier=True,
                                                joint=joint),
+                navigation_data=self._make_navigation_data(),
+                crp_data=self._make_crps(),
+                sme_table=self._make_target_selection_table(),
+                feature_data=self._make_feature_plots(),
+                joint=joint
+        )
+    
+    def generate_open_loop_courier_report(self, joint):
+        
+        return self._render(
+                'Courier_OL',
+                stim=True,
+                combined_summary=self._make_combined_summary(),
+                stim_params=EFRCourierStimSessionSummary.stim_parameters(
+                    self.session_summaries),
+                plot_data=self._make_plot_data(stim=True, classifier=False,
+                                               joint=joint),
+                navigation_data=self._make_navigation_data(),
+                crp_data=self._make_crps(),
                 sme_table=self._make_target_selection_table(),
                 feature_data=self._make_feature_plots(),
                 joint=joint

@@ -164,7 +164,7 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 
     elif 'DBOY1' in experiment:
         all_events = load_events(subject, experiment, sessions=sessions,
-                                 rootdir=paths.root, file_type=file_type)
+                                 rootdir=paths.root, file_type='task_events')
         task_events, stim_params = clean_events(
                 all_events, start_time=kwargs['baseline_removal_start_time'],
                 end_time=kwargs['retrieval_time'],

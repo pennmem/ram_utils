@@ -48,6 +48,65 @@ var ramutils = (function (mod, Plotly) {
       Plotly.plot('serialpos-plot-placeholder', data, layout);
     },
 
+    plotLagCRP: function (lag, probs) {
+      const mode = "lines+markers";
+      let data = [];
+
+      for (let name in probs) {
+        console.log(name);
+        data.push({
+          x: lag,
+          y: probs[name],
+          mode: mode,
+          name: name
+        });
+      }
+
+      const layout = {
+        title: "Lag CRP",
+        xaxis: {
+          title: 'Lag',
+          range: [0.9, lag.length + .1]
+        },
+        yaxis: {
+          title: 'Conditional Response Probability',
+          range: [0, 1]
+        }
+      };
+
+      Plotly.plot('serialpos-plot-placeholder', data, layout);
+    },
+
+    plotSpatialCRP: function (sem_bin, probs) {
+      const mode = "lines+markers";
+      let data = [];
+
+      for (let name in probs) {
+        console.log(name);
+        data.push({
+          x: sem_bin,
+          y: probs[name],
+          mode: mode,
+          name: name
+        });
+      }
+
+      const layout = {
+        title: "Distance Bin",
+        xaxis: {
+          title: 'Lag',
+          range: [0.9, sem_bin.length + .1]
+          // ticktext: ["very near", "near", "intermediate", "far", "very far"]
+        },
+        yaxis: {
+          title: 'Conditional Response Probability',
+          range: [0, 1]
+        }
+      };
+
+      Plotly.plot('serialpos-plot-placeholder', data, layout);
+    },
+
     plotCategoricalFreeRecallSummary: function (irt_within_cat, irt_between_cat, repetition_ratios, subject_ratio) {
       const data = [
         {
