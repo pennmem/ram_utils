@@ -74,9 +74,7 @@ def validate_stim_settings(args):
 
         if args.experiment == "LocationSearch":
             if len(args.anodes) > 6:
-                raise ValidationError(
-                    "LocationSearch is limited to a maximum of 6 stim channels"
-                )
+                 print('Warning: using more than 6 pairs in LocationSearch.')
 
         if args.experiment != "AmplitudeDetermination" and not args.experiment.startswith('PS'):
             if args.target_amplitudes is None:
