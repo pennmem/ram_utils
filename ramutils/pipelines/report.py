@@ -79,7 +79,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     """
     # Lower case 'c' is expected for reading events. The reader should probably
     # just be case insensitive
-    if 'Cat' in experiment:
+    if 'Cat' in experiment and not 'ICat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
