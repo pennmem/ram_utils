@@ -389,6 +389,7 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
+    
     if sessions is not None:
         if len(sessions) == 1:
             all_pairs_paths = json_reader.aggregate_values('pairs',
@@ -410,6 +411,7 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
     else:
         all_pairs_paths = json_reader.aggregate_values('pairs',
                                                        subject_alias=subject)
+        
 
     if len(all_pairs_paths) == 0:
         raise RuntimeError("No pairs.json found for subject {} "

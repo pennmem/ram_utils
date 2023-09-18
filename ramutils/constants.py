@@ -13,7 +13,8 @@ EXPERIMENTS = {
         'ICatFR1',
         'PAL1',
         'DBOY1',
-        'RepFR1'
+        'RepFR1',
+        'EFRCourierReadOnly'
     ],
     'ps': [
         'PS4_FR5',
@@ -28,7 +29,8 @@ EXPERIMENTS = {
         'FR2',
         'CatFR2',
         'ICatFR2',
-        'RepFR2'
+        'RepFR2',
+        'EFRCourierOpenLoop'
     ],
     'closed_loop': [
         'FR3',

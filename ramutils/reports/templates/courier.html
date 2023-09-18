@@ -4,8 +4,12 @@
 {% endblock %}
 
 {% block report %}
-{% include 'session_summary.html' %}
+{% include 'courier_session_summary.html' %}
+{% include 'navigation_time.html' %}
 {% include 'serialpos_curve.html' %}
+{% include 'lag_CRP.html' %}
+{% include 'spatial_CRP.html' %}
+{% include 'navigation_trajectory.html' %}
 {% if joint %}
   {% include 'categorical.html' %}
 {% endif %}

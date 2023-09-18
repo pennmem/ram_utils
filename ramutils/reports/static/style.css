@@ -24,6 +24,11 @@ figcaption {
     margin: 1vw;
 }
 
+.navigation-plot{
+    min-width:400px;
+    margin: 1vw;
+}
+
 #navbar-spacer {
   padding-top: 5em;
 }

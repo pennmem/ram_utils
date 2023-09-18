@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ subject }} RAM FR1 Report
+{% endblock %}
+
+{% block report %}
+{% include 'courier_stim_summary.html' %}
+{% include 'courier_session_summary.html' %}
+{% include 'navigation_time.html' %}
+{% include 'serialpos_curve.html' %}
+{% include 'lag_CRP.html' %}
+{% include 'spatial_CRP.html' %}
+{% include 'navigation_trajectory.html' %}
+{% if joint %}
+  {% include 'categorical.html' %}
+{% endif %}
+{% include 'feature_plot_img.html' %}
+{% include 'stim_recall_analysis.html' %}
+{% include 'sme.html' %}
+{% endblock %}

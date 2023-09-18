@@ -278,4 +278,109 @@ def generate_data_for_dboy_report(subject, experiment, sessions,
                       behavioral_results=None)
 
 
+def generate_data_for_efrcourier_report(subject, experiment, sessions,
+                                         joint_report, paths, ec_pairs,
+                                         used_pair_mask, excluded_pairs,
+                                         final_pairs, pairs_metadata_table,
+                                         all_events, **kwargs):
+    
+    """ Report generation sub-pipeline that is shared by all nonstim reports """
+    repetition_ratio_dict = {}
+    if joint_report or (experiment == 'catFR1'):
+        repetition_ratio_dict = get_repetition_ratio_dict(paths)
 
+    # This logic is very similar to what is done in config generation except
+    # that events are not combined by default
+    if not joint_report:
+        kwargs['combine_events'] = False
+
+    kwargs['encoding_only'] = False
+    all_task_events = build_training_data(subject,
+                                          experiment,
+                                          paths,
+                                          sessions=sessions,
+                                          **kwargs)
+
+    powers, final_task_events = compute_normalized_powers(
+            all_task_events, bipolar_pairs=ec_pairs, **kwargs)
+
+    reduced_powers = reduce_powers(powers, used_pair_mask,
+                                   len(kwargs['freqs']))
+
+    sample_weights = get_sample_weights(final_task_events, **kwargs)
+
+    classifier = train_classifier(reduced_powers,
+                                  final_task_events,
+                                  sample_weights,
+                                  kwargs['C'],
+                                  kwargs['penalty_type'],
+                                  kwargs['solver'])
+
+    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
+                                                           'location',
+                                                           'region']],
+                                     [('label', 'S256'),
+                                      ('location', 'S256'),
+                                      ('region', 'S256')])[used_pair_mask]
+
+    joint_classifier_summary = summarize_classifier(classifier,
+                                                    reduced_powers,
+                                                    final_task_events,
+                                                    kwargs['n_perm'],
+                                                    tag='Joint',
+                                                    pairs=pairinfo,
+                                                    **kwargs)
+    # Serialize the classifier here
+    trained_classifier = serialize_classifier(classifier,
+                                              final_pairs,
+                                              reduced_powers,
+                                              final_task_events,
+                                              sample_weights,
+                                              joint_classifier_summary,
+                                              subject)
+
+    # Subset events, powers, etc to get encoding-only classifier summary
+    kwargs['scheme'] = 'EQUAL'
+    encoding_only_mask = get_word_event_mask(final_task_events, True)
+    final_encoding_task_events = subset_events(final_task_events,
+                                               encoding_only_mask)
+    encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
+
+    encoding_sample_weights = get_sample_weights(final_encoding_task_events,
+                                                 **kwargs)
+
+    encoding_classifier = train_classifier(encoding_reduced_powers,
+                                           final_encoding_task_events,
+                                           encoding_sample_weights,
+                                           kwargs['C'],
+                                           kwargs['penalty_type'],
+                                           kwargs['solver'])
+
+    encoding_classifier_summary = summarize_classifier(
+            encoding_classifier, encoding_reduced_powers,
+            final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
+            tag='Encoding', **kwargs)
+
+    target_selection_table = create_target_selection_table(
+            pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
+            hfa_cutoff=kwargs['hfa_cutoff'], trigger_freq=kwargs['trigger_freq'],
+            root=paths.root)
+
+    session_summaries = summarize_nonstim_sessions(all_events,
+                                                   final_task_events,
+                                                   ec_pairs,
+                                                   excluded_pairs,
+                                                   powers,
+                                                   joint=joint_report,
+                                                   repetition_ratio_dict=repetition_ratio_dict)
+
+    classifier_evaluation_results = [encoding_classifier_summary,
+                                     joint_classifier_summary]
+
+    return ReportData(session_summaries=session_summaries,
+                      target_selection_table=target_selection_table,
+                      classifier_evaluation_results=classifier_evaluation_results,
+                      trained_classifier=trained_classifier,
+                      repetition_ratio_dict=repetition_ratio_dict,
+                      retrained_classifier=trained_classifier,
+                      behavioral_results=None)

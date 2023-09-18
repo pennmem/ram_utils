@@ -1,0 +1,12 @@
+<div class="plot lag-crp">
+  <h2>Lag-CRP</h2>
+  <figure>
+    <div id="lag-crp-placeholder"></div>
+    <script>
+      window.addEventListener('load', () => {
+        let crp_data = JSON.parse('{{ crp_data["lag"] }}');
+        ramutils.plots.plotLagCRP(crp_data.lag, crp_data.prob);
+      });
+    </script>
+  </figure>
+</div>

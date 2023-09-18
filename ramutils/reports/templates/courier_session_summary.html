@@ -1,0 +1,52 @@
+<div>
+  <h2>Session summary</h2>
+
+  <h3>Individual sessions</h3>
+  <table id="session_summary_table" class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Session ID</th>
+        <th>Date</th>
+        <th>Length [min]</th>
+        <th>Number of delivery days</th>
+        <th>Recall percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for summary in summaries %}
+        <tr>
+          <td>{{ summary.id }}</td>
+          <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
+          <td>{{ "{:.2f}".format(summary.session_length/60.0) }}</td>
+          <td>{{ summary.num_lists }}</td>
+          <td>{{ "{:.1f}%".format(summary.percent_recalled) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>All sessions</h3>
+  <table class="table table-striped table-hover">
+    <tr>
+      <th scope="row">Total Number of Words</th>
+      <td>{{ combined_summary['n_words'] }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Total Number Correct</th>
+      <td>{{ combined_summary['n_correct'] }} ({{ '{:.1f}%'.format(100 * combined_summary['n_correct'] / combined_summary['n_words']) }})</td>
+    </tr>
+    <tr>
+      <th scope="row">Total Number of Prior-list Intrusions</th>
+      <td>{{ combined_summary['n_pli'] }}</td>
+    </tr>
+    <tr>
+     <th scope="row">Total Number of Extra-list Intrusions</th>
+     <td>{{ combined_summary['n_eli'] }}</td>
+    </tr>
+  </table>
+</div>
+<script>
+   window.addEventListener('load', () => {
+    $('#session_summary_table').DataTable();
+   });
+</script>
