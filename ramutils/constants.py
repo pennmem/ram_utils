@@ -12,7 +12,9 @@ EXPERIMENTS = {
         'CatFR1',
         'PAL1',
         'DBOY1',
-        'RepFR1'
+        'RepFR1',
+        'IFR1',
+        'ICatFR1'
     ],
     'ps': [
         'PS4_FR5',
@@ -38,6 +40,10 @@ EXPERIMENTS = {
         'CatFR6',
         'TICL_FR',
         'TICL_CatFR',
+        'IFR5',
+        'ICatFR5',
+        'IFR6',
+        'ICatFR6',
     ],
 
     # Experiments that allow multiple stim locations
@@ -48,6 +54,8 @@ EXPERIMENTS = {
         'PS4_CatFR5',
         'FR6',
         'CatFR6',
+        'IFR6',
+        'ICatFR6',
     ]
 }
 
