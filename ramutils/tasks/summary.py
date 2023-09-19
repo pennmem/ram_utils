@@ -121,14 +121,14 @@ def summarize_nonstim_sessions(all_events, task_events,
         session_powers = normalized_powers[(task_events.session == session)]
         experiment = extract_experiment_from_events(session_task_events)[0]
 
-        if experiment in ['FR1']:
+        if experiment in ['FR1', 'IFR1']:
             summary = FRSessionSummary()
             summary.populate(session_task_events,
                              bipolar_pairs,
                              excluded_pairs,
                              session_powers,
                              raw_events=session_all_events)
-        elif experiment in ['catFR1']:
+        elif experiment in ['catFR1', 'ICatFR1']:
             summary = CatFRSessionSummary()
             summary.populate(session_task_events,
                              bipolar_pairs,
@@ -295,7 +295,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
 
-        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5', 'FR6', 'catFR6']:
+        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5', 'FR6', 'catFR6', 'ICatFR5', 'ICatFR6']:
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(
