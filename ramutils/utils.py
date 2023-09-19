@@ -390,3 +390,32 @@ def encode_file(fd):
     """
     fd.seek(0)
     return base64.b64encode(fd.read()).decode()
+
+
+def insert_column(recarr, column_name, data, dtype, position):
+    """
+    Insert a column into a recarray at a specific position.
+
+    Parameters:
+    - recarr: the original recarray
+    - column_name: the name of the new column to be added
+    - data: the data for the new column
+    - dtype: the data type for the new column
+    - position: the position to insert the new column at
+    Returns:
+    - new_arr: a new recarray with the inserted column
+    """
+    
+    if position > len(recarr.dtype.names):
+        raise ValueError("Position is out of range.")
+
+    before = [(name, recarr.dtype.fields[name][0]) for name in recarr.dtype.names[:position]]
+    after = [(name, recarr.dtype.fields[name][0]) for name in recarr.dtype.names[position:]]
+    new_dtype = np.dtype(before + [(column_name, dtype)] + after)
+
+    new_arr = np.rec.array(np.zeros(recarr.shape, dtype=new_dtype))
+
+    for name in recarr.dtype.names:
+        new_arr[name] = recarr[name]
+    new_arr[column_name] = data
+    return new_arr

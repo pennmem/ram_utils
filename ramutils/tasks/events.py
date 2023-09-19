@@ -11,6 +11,9 @@ from ramutils.events import remove_practice_lists, separate_stim_events
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
+from ..utils import insert_column
+import numpy as np
+
 __all__ = [
     'get_word_event_mask',
     'subset_events',
@@ -75,6 +78,10 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                          duration=kwargs['empty_epoch_duration'],
                                          pre=kwargs['pre_event_buf'],
                                          post=kwargs['post_event_buf'])
+        if 'iscorrect' not in cleaned_ifr_events.dtype.names:
+          iscorrect_index = fr_events.dtype.names.index('iscorrect')
+          cleaned_ifr_events = insert_column(cleaned_ifr_events, 'iscorrect', 
+                                               np.full(cleaned_ifr_events.shape, -999), int, iscorrect_index)
 
         icatfr_events = load_events(subject, 'ICatFR1',
                                    sessions=sessions,
@@ -85,6 +92,11 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                             duration=kwargs['empty_epoch_duration'],
                                             pre=kwargs['pre_event_buf'],
                                             post=kwargs['post_event_buf'])
+        
+        if 'iscorrect' not in cleaned_icatfr_events.dtype.names:
+            iscorrect_index = catfr_events.dtype.names.index('iscorrect')
+            cleaned_icatfr_events = insert_column(cleaned_icatfr_events, 'iscorrect', 
+                                                  np.full(cleaned_icatfr_events.shape, -999), int, iscorrect_index)
 
         free_recall_events = concatenate_events_across_experiments(
             [cleaned_fr_events, cleaned_catfr_events, cleaned_ifr_events, cleaned_icatfr_events], cat=True)
