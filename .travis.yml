@@ -7,6 +7,10 @@ notifications:
 env:
   - TRAVIS_CI=1
 
+# set build size to avoid 137 out of memory error
+vm:
+  size: large
+
 # conda setup copied from the conda docs
 install:
   # We do this conditionally because it saves us some downloading if the
