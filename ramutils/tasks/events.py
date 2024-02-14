@@ -11,6 +11,9 @@ from ramutils.events import remove_practice_lists, separate_stim_events
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
+from ..utils import insert_column
+import numpy as np
+
 __all__ = [
     'get_word_event_mask',
     'subset_events',
@@ -67,8 +70,36 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                             pre=kwargs['pre_event_buf'],
                                             post=kwargs['post_event_buf'])
 
+        ifr_events = load_events(subject, 'IFR1', sessions=sessions,
+                                rootdir=paths.root)
+        cleaned_ifr_events = clean_events(ifr_events,
+                                         start_time=kwargs['baseline_removal_start_time'],
+                                         end_time=kwargs['retrieval_time'],
+                                         duration=kwargs['empty_epoch_duration'],
+                                         pre=kwargs['pre_event_buf'],
+                                         post=kwargs['post_event_buf'])
+        if 'iscorrect' not in cleaned_ifr_events.dtype.names:
+          iscorrect_index = fr_events.dtype.names.index('iscorrect')
+          cleaned_ifr_events = insert_column(cleaned_ifr_events, 'iscorrect', 
+                                               np.full(cleaned_ifr_events.shape, -999), int, iscorrect_index)
+
+        icatfr_events = load_events(subject, 'ICatFR1',
+                                   sessions=sessions,
+                                   rootdir=paths.root)
+        cleaned_icatfr_events = clean_events(icatfr_events,
+                                            start_time=kwargs['baseline_removal_start_time'],
+                                            end_time=kwargs['retrieval_time'],
+                                            duration=kwargs['empty_epoch_duration'],
+                                            pre=kwargs['pre_event_buf'],
+                                            post=kwargs['post_event_buf'])
+        
+        if 'iscorrect' not in cleaned_icatfr_events.dtype.names:
+            iscorrect_index = catfr_events.dtype.names.index('iscorrect')
+            cleaned_icatfr_events = insert_column(cleaned_icatfr_events, 'iscorrect', 
+                                                  np.full(cleaned_icatfr_events.shape, -999), int, iscorrect_index)
+
         free_recall_events = concatenate_events_across_experiments(
-            [cleaned_fr_events, cleaned_catfr_events], cat=True)
+            [cleaned_fr_events, cleaned_catfr_events, cleaned_ifr_events, cleaned_icatfr_events], cat=True)
 
     elif "FR" in experiment and not kwargs['combine_events']:
         free_recall_events = load_events(subject, experiment, sessions=sessions,
@@ -140,13 +171,38 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
             pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
             return_stim_events=True)
 
+        # Immediate Free Recall variants
+        ifr_events = load_events(subject, 'IFR' + series_num,
+                                 sessions=sessions,
+                                 rootdir=paths.root)
+        cleaned_ifr_events, ifr_stim_params = clean_events(
+            ifr_events, start_time=kwargs['baseline_removal_start_time'],
+            end_time=kwargs['retrieval_time'],
+            duration=kwargs['empty_epoch_duration'],
+            pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
+            return_stim_events=True)
+
+        icatfr_events = load_events(subject, 'ICatFR' + series_num,
+                                    sessions=sessions,
+                                    rootdir=paths.root)
+        cleaned_icatfr_events, icatfr_stim_params = clean_events(
+            icatfr_events, start_time=kwargs['baseline_removal_start_time'],
+            end_time=kwargs['retrieval_time'],
+            duration=kwargs['empty_epoch_duration'],
+            pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
+            return_stim_events=True)
+
         all_events = concatenate_events_across_experiments([fr_events,
-                                                            catfr_events])
+                                                            catfr_events,
+                                                            ifr_events,
+                                                            icatfr_events])
         task_events = concatenate_events_across_experiments(
             [cleaned_fr_events, cleaned_catfr_events], cat=True)
 
         stim_params = concatenate_events_across_experiments([fr_stim_params,
-                                                             catfr_stim_params],
+                                                             catfr_stim_params,
+                                                             ifr_stim_params,
+                                                             icatfr_stim_params],
                                                             stim=True)
 
     elif not joint_report and 'FR' in experiment:
