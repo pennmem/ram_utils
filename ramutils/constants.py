@@ -40,6 +40,8 @@ EXPERIMENTS = {
         'CatFR6',
         'TICL_FR',
         'TICL_CatFR',
+        'IFR3',
+        'ICatFR3',
         'IFR5',
         'ICatFR5',
         'IFR6',
