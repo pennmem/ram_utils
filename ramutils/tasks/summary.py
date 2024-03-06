@@ -295,7 +295,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
 
-        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5', 'FR6', 'catFR6', 'ICatFR5', 'ICatFR6']:
+        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5', 'FR6', 'catFR6', 'IFR6', 'ICatFR5', 'ICatFR6']:
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(
