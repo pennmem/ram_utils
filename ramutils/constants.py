@@ -9,6 +9,7 @@ defined here include:
 EXPERIMENTS = {
     'record_only': [
         'FR1',
+        'IFR1',
         'CatFR1',
         'ICatFR1',
         'PAL1',
@@ -42,6 +43,7 @@ EXPERIMENTS = {
         'ICatFR5',
         'PAL5',
         'FR6',
+        'IFR6',
         'CatFR6',
         'ICatFR6',
         'TICL_FR',

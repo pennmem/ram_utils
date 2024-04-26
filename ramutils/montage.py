@@ -414,8 +414,9 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
         
 
     if len(all_pairs_paths) == 0:
-        raise RuntimeError("No pairs.json found for subject {} "
-                           "and experiment {}".format(subject, experiment))
+        raise RuntimeError("No pairs.json found in r1.json for subject {}, "
+            "experiment {}, and sessions: {}".format(subject, experiment,
+            ', '.join(str(s) for s in sessions) if sessions else 'all'))
 
     elif len(all_pairs_paths) > 1:
         raise RuntimeError('Multiple montages are possible')
