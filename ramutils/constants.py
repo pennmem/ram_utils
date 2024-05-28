@@ -35,10 +35,12 @@ EXPERIMENTS = {
     ],
     'closed_loop': [
         'FR3',
+        'IFR3',
         'CatFR3',
         'ICatFR3',
         'PAL3',
         'FR5',
+        'IFR5',
         'CatFR5',
         'ICatFR5',
         'PAL5',
@@ -47,7 +49,7 @@ EXPERIMENTS = {
         'CatFR6',
         'ICatFR6',
         'TICL_FR',
-        'TICL_CatFR',
+        'TICL_CatFR'
     ],
 
     # Experiments that allow multiple stim locations
@@ -57,8 +59,9 @@ EXPERIMENTS = {
         'PS4_FR5',
         'PS4_CatFR5',
         'FR6',
+        'IFR6',
         'CatFR6',
-        'ICatFR6',
+        'ICatFR6'
     ]
 }
 

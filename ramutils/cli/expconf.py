@@ -83,8 +83,17 @@ def validate_stim_settings(args):
         if args.experiment != "AmplitudeDetermination" and not args.experiment.startswith('PS'):
             if args.target_amplitudes is None:
                 raise RuntimeError("--target-amplitudes is required")
+            if not (args.min_amplitudes is None and args.max_amplitudes is None):
+                raise RuntimeError('--min-amplitudes and --max-amplitudes are only used with '
+                                   'AmplitudeDetermination and "PS" experiments. To specify '
+                                   'a config for ' + args.experiment + ', only specify '
+                                   '--target-amplitudes')
             valid = len(args.anodes) == len(args.target_amplitudes)
         else:
+            if not args.target_amplitudes is None:
+                raise RuntimeError('Cannot specify --target-amplitudes (which is only used in '
+                                   '"PS" and AtmplitudeDetermination experiments) with '
+                                   '--min-amplitudes or --max-amplitudes!')
             valid = len(args.anodes) == len(
                 args.min_amplitudes) == len(args.max_amplitudes)
 
