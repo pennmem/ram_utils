@@ -192,7 +192,7 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     # LocationSearch-specific section
     if experiment == "LocationSearch":
         esd["location_search"] = {
-            "stim_events_per_channel": 30,
+            "stim_events_per_channel": 90,
             "num_sham_channels": 1,
             "isi_min": 2750,
             "isi_max": 3250
