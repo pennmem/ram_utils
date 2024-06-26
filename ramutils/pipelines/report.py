@@ -288,7 +288,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      all_events, **kwargs):
     """ Report generation sub-pipeline that is shared by all nonstim reports """
     repetition_ratio_dict = {}
-    if joint_report or (experiment == 'catFR1'):
+    if (joint_report and (experiment in ['FR1', 'catFR1'])) or (experiment == 'catFR1'):
         repetition_ratio_dict = get_repetition_ratio_dict(paths)
 
     # This logic is very similar to what is done in config generation except
