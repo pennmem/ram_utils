@@ -751,6 +751,9 @@ def get_distances(pairs):
     return distmat
 
 def extract_rejected_pairs(subject, used_classifiers, ec_pairs, used_pair_mask):
+    print("extract_rejected_pairs")
+    print(f"ec_pairs: {ec_pairs}")
+
     used_pair_mask = np.array(used_pair_mask)
     for classifier in used_classifiers:
         if classifier is not None:
