@@ -434,21 +434,39 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
     with open(bp_path, 'r') as f:
         pair_data = json.load(f, object_pairs_hook=OrderedDict)
     # print(f"load_pairs_from_json, pair_data before removing: {pair_data}")
+    # --- NEW: strip non-subject metadata like "version" before anything else ---
+    if "version" in pair_data:
+        pair_data.pop("version")
+
     if just_pairs:
         pair_data = extract_pairs_dict(pair_data)
         return pair_data
 
-    # Update the subject_id not be standard format
-    stored_subject = list(pair_data.keys())[0]
-    print(f"load_pairs_from_json, stored_subject: {stored_subject}")
-    if stored_subject != subject:
-        print(subject)
+    # Update the subject_id to be standard format
+    if subject not in pair_data:
+        # pick whatever subject key is stored in the file (first remaining key)
+        stored_subject = list(pair_data.keys())[0]
+        print(f"load_pairs_from_json, stored_subject: {stored_subject}")
         pair_data[subject] = pair_data[stored_subject]
-        print(f"pair_data[stored_subject]: {pair_data[stored_subject]}")
-        print(f"pair_data[subject]: {pair_data[subject]}")
         del pair_data[stored_subject]
+
     print(f"load_pairs_from_json, pair_data after removing: {pair_data}")
     return pair_data
+    # if just_pairs:
+    #     pair_data = extract_pairs_dict(pair_data)
+    #     return pair_data
+
+    # # Update the subject_id not be standard format
+    # stored_subject = list(pair_data.keys())[0]
+    # print(f"load_pairs_from_json, stored_subject: {stored_subject}")
+    # if stored_subject != subject:
+    #     print(subject)
+    #     pair_data[subject] = pair_data[stored_subject]
+    #     print(f"pair_data[stored_subject]: {pair_data[stored_subject]}")
+    #     print(f"pair_data[subject]: {pair_data[subject]}")
+    #     del pair_data[stored_subject]
+    # print(f"load_pairs_from_json, pair_data after removing: {pair_data}")
+    # return pair_data
 
 
 def extract_atlas_location(bp_data):
