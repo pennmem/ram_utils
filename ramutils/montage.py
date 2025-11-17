@@ -435,6 +435,7 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
         pair_data = json.load(f, object_pairs_hook=OrderedDict)
 
     if just_pairs:
+        print(f"load_pairs_from_json, pair_data: {pair_data}")
         pair_data = extract_pairs_dict(pair_data)
         return pair_data
 
