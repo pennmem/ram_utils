@@ -351,6 +351,8 @@ def extract_pairs_dict(pairs):
 
     """
     keys = list(pairs.keys())
+    print("extract_pairs_dict")
+    print(f"keys: {keys}"
     # Handle empty dictionary case
     if len(keys) == 0:
         return pairs
@@ -359,8 +361,8 @@ def extract_pairs_dict(pairs):
     if 'version' in keys:
         keys.remove('version')
     subject = keys[0]
-    print(pairs)
-    print(subject)
+    print(f"paris: {pairs}")
+    print(f"subject: {subject}")
     pairs = pairs[subject]['pairs']
 
     return pairs
@@ -536,10 +538,11 @@ def get_pairs(subject_id, experiment, sessions, paths):
     # Use * for session so we don't have to assume session numbers start at 0
     subject,montage = extract_subject_montage(subject_id)
     reader = JsonIndexReader(osp.join(paths.root,'protocols','r1.json'))
+    print("get_pairs")
     print("montage.py")
-    print(subject)
-    print(experiment)
-    print(montage)
+    print(f"subject: {subject}")
+    print(f"experiment: {experiment}")
+    print(f"montage: {montage}")
 
     event_path = list(reader.aggregate_values(
         'task_events',subject=subject,montage=montage,experiment=experiment)
