@@ -751,6 +751,8 @@ def extract_rejected_pairs(subject, used_classifiers, ec_pairs, used_pair_mask):
         subject, rejected_pairs.label0.astype(str),
         rejected_pairs.label1.astype(str),
         target_amplitudes=[0]*len(rejected_pairs))
+    print("extract_reject_pairs")
+    print("ec_pairs:", ec_pairs)
     rejected_pairs = reduce_pairs(ec_pairs,
                                   rejected_pairs_as_stim_params,
                                   return_excluded=True)
