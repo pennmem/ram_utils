@@ -433,14 +433,14 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
     bp_path = os.path.join(rootdir, list(all_pairs_paths)[0])
     with open(bp_path, 'r') as f:
         pair_data = json.load(f, object_pairs_hook=OrderedDict)
-
+    print(f"load_pairs_from_json, pair_data: {pair_data}")
     if just_pairs:
-        print(f"load_pairs_from_json, pair_data: {pair_data}")
         pair_data = extract_pairs_dict(pair_data)
         return pair_data
 
     # Update the subject_id not be standard format
     stored_subject = list(pair_data.keys())[0]
+    print(f"load_pairs_from_json, stored_subject: {stored_subject}")
     if stored_subject != subject:
         pair_data[subject] = pair_data[stored_subject]
         del pair_data[stored_subject]
