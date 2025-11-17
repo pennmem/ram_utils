@@ -255,7 +255,10 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
     """
     if stim_params is None:
         stim_params = []
-
+    print("reduce_pairs")
+    print(f"pairs: ")
+    print(f"pairs: {pairs}")
+    print(f"stim_params: {stim_params}")
     pairs = extract_pairs_dict(pairs)
     contacts = [(p.anode, p.cathode) for p in stim_params]
     reduced_pairs = OrderedDict()
