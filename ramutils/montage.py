@@ -255,10 +255,10 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
     """
     if stim_params is None:
         stim_params = []
-    print("reduce_pairs")
-    print(f"pairs: ")
-    print(f"pairs: {pairs}")
-    print(f"stim_params: {stim_params}")
+    # print("reduce_pairs")
+    # print(f"pairs: ")
+    # print(f"pairs: {pairs}")
+    # print(f"stim_params: {stim_params}")
     pairs = extract_pairs_dict(pairs)
     contacts = [(p.anode, p.cathode) for p in stim_params]
     reduced_pairs = OrderedDict()
@@ -354,8 +354,8 @@ def extract_pairs_dict(pairs):
 
     """
     keys = list(pairs.keys())
-    print("extract_pairs_dict")
-    print(f"keys: {keys}")
+    # print("extract_pairs_dict")
+    # print(f"keys: {keys}")
     # Handle empty dictionary case
     if len(keys) == 0:
         return pairs
@@ -364,8 +364,8 @@ def extract_pairs_dict(pairs):
     if 'version' in keys:
         keys.remove('version')
     subject = keys[0]
-    print(f"pairs values: {pairs.values()}")
-    print(f"subject: {subject}")
+    # print(f"pairs values: {pairs.values()}")
+    # print(f"subject: {subject}")
     pairs = pairs[subject]['pairs']
 
     return pairs
@@ -446,11 +446,11 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
     if subject not in pair_data:
         # pick whatever subject key is stored in the file (first remaining key)
         stored_subject = list(pair_data.keys())[0]
-        print(f"load_pairs_from_json, stored_subject: {stored_subject}")
+        # print(f"load_pairs_from_json, stored_subject: {stored_subject}")
         pair_data[subject] = pair_data[stored_subject]
         del pair_data[stored_subject]
 
-    print(f"load_pairs_from_json, pair_data after removing: {pair_data}")
+    # print(f"load_pairs_from_json, pair_data after removing: {pair_data}")
     return pair_data
     # if just_pairs:
     #     pair_data = extract_pairs_dict(pair_data)
@@ -563,7 +563,7 @@ def get_pairs(subject_id, experiment, sessions, paths):
     # Use * for session so we don't have to assume session numbers start at 0
     subject,montage = extract_subject_montage(subject_id)
     reader = JsonIndexReader(osp.join(paths.root,'protocols','r1.json'))
-    print("get_pairs")
+    # print("get_pairs")
     print("montage.py")
     print(f"subject: {subject}")
     print(f"experiment: {experiment}")
@@ -773,8 +773,8 @@ def get_distances(pairs):
     return distmat
 
 def extract_rejected_pairs(subject, used_classifiers, ec_pairs, used_pair_mask):
-    print("extract_rejected_pairs")
-    print(f"ec_pairs: {ec_pairs}")
+    # print("extract_rejected_pairs")
+    # print(f"ec_pairs: {ec_pairs}")
 
     used_pair_mask = np.array(used_pair_mask)
     for classifier in used_classifiers:
