@@ -352,7 +352,7 @@ def extract_pairs_dict(pairs):
     """
     keys = list(pairs.keys())
     print("extract_pairs_dict")
-    print(f"keys: {keys}"
+    print(f"keys: {keys}")
     # Handle empty dictionary case
     if len(keys) == 0:
         return pairs
