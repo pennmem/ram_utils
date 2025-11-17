@@ -123,7 +123,7 @@ def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_p
             updated_events = updated_events[ev_order]
             updated_events = np.rec.array(updated_events)
 
-        eeg = MonopolarToBipolarMapper(bipolar_pairs=bipolar_pairs).filter(eeg)
+        eeg = MonopolarToBipolarMapper(timeseries=eeg, bipolar_pairs=bipolar_pairs).filter()
     return eeg, updated_events
 
 
