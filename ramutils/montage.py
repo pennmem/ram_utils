@@ -361,7 +361,7 @@ def extract_pairs_dict(pairs):
     if 'version' in keys:
         keys.remove('version')
     subject = keys[0]
-    print(f"paris: {pairs}")
+    print(f"pairs values: {pairs.values()}")
     print(f"subject: {subject}")
     pairs = pairs[subject]['pairs']
 
